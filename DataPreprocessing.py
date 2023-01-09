@@ -13,6 +13,20 @@ FINETUNING_LANGS = ["en",  # English
                     "es",  # Spanish
                     "it",  # Italian
                     "fr"]  # French
+DATASETS_TYPES = ["binary",
+                  "yesno",
+                  "comparative",
+                  "count",
+                  "superlative"
+                  "difference",
+                  "generic",
+                  "ordinal",
+                  "intersection",
+                  "multihop",
+                  "date",
+                  "entity",
+                  "number",
+                  "number_with_unit"]
 MAX_WORDS_IN_ANSWER = 10
 MKQA_TRAIN_DEV_RATIO = 0.9
 
@@ -104,7 +118,7 @@ class DataPreprocessing:
         # Filter data:
         data = [dic for dic in data if (len(dic['answers']['en']) == 1)]  # remove several answers
         data = [dic for dic in data if
-                dic['answers']['en'][0]['type'] not in ['unanswerable', 'long_answer']]  # remove unanswerable questions
+                dic['answers']['en'][0]['type'] not in ['unanswerable', 'long_answer', 'short_phrase']]  # remove unanswerable questions
         data = [dic for dic in data if
                 len(dic['answers']['en'][0]['text'].split()) < MAX_WORDS_IN_ANSWER]  # remove long answers
         data_rows = []
@@ -116,7 +130,8 @@ class DataPreprocessing:
                 question = question if question[-1] == '?' else question + '?'
                 data_rows.append({
                     "Dataset": "MKQA",
-                    "Type": data_type,
+                    "DataType": data_type,
+                    "Type": qa['answers'][lang][0]["type"],
                     "Id": str(qa["example_id"]),
                     "Language": lang,
                     "Question": question,
@@ -125,7 +140,7 @@ class DataPreprocessing:
 
         # Split to dev set
         for i in range(round(len(data_rows) * MKQA_TRAIN_DEV_RATIO), len(data_rows)):
-            data_rows[i]["Type"] = "dev"
+            data_rows[i]["DataType"] = "dev"
 
         return data_rows
 
@@ -145,7 +160,8 @@ class DataPreprocessing:
                     continue
                 data_rows.append({
                     "Dataset": "NQ",
-                    "Type": data_type,
+                    "DataType": data_type,
+                    "Type": "nq",
                     "Id": str(qa[0]),
                     "Language": "en",
                     "Question": question,
@@ -177,7 +193,8 @@ class DataPreprocessing:
                         continue
                     data_rows.append({
                         "Dataset": "Mintaka",
-                        "Type": data_type,
+                        "DataType": data_type,
+                        "Type": qa["complexityType"],
                         "Id": str(qa["id"]),
                         "Language": lang,
                         "Question": question,
@@ -191,17 +208,18 @@ class DataPreprocessing:
         print(f"==========================      Preprocess dataset details:      =========================")
         print(f"------ Number of examples: ------")
         print(f"Total: {self.data.shape[0]}")
-        print(f"Training: {self.data.loc[self.data['Type'] == 'train'].shape[0]}")
-        print(f"Training: {self.data.loc[self.data['Type'] == 'dev'].shape[0]}")
-        print(f"NQ: Train: {self.data.loc[(self.data['Type'] == 'train') & (self.data['Dataset'] == 'NQ')].shape[0]} "
-              f"Dev: {self.data.loc[(self.data['Type'] == 'dev') & (self.data['Dataset'] == 'NQ')].shape[0]}")
-        print(f"MKQA: Train: {self.data.loc[(self.data['Type'] == 'train') & (self.data['Dataset'] == 'MKQA')].shape[0]} "
-              f"Dev: {self.data.loc[(self.data['Type'] == 'dev') & (self.data['Dataset'] == 'MKQA')].shape[0]}")
-        print(f"Mintaka: Train: {self.data.loc[(self.data['Type'] == 'train') & (self.data['Dataset'] == 'Mintaka')].shape[0]} "
-              f"Dev: {self.data.loc[(self.data['Type'] == 'dev') & (self.data['Dataset'] == 'Mintaka')].shape[0]}")
+        print(f"Training: {self.data.loc[self.data['DataType'] == 'train'].shape[0]}")
+        print(f"Training: {self.data.loc[self.data['DataType'] == 'dev'].shape[0]}")
+        print(f"NQ: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'NQ')].shape[0]} "
+              f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'NQ')].shape[0]}")
+        print(f"MKQA: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'MKQA')].shape[0]} "
+              f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'MKQA')].shape[0]}")
+        print(f"Mintaka: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'Mintaka')].shape[0]} "
+              f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'Mintaka')].shape[0]}")
 
 
 if __name__ == "__main__":
     dp = DataPreprocessing()
     dp.preprocess()
     dp.print_dataset_details()
+    # dp.data.to_csv("Datasets/PreprocessDataset.csv")

@@ -5,6 +5,7 @@ import os
 from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
 from MLCBQA_Dataset import MLCBQA_Dataset
 from transformers import MT5Tokenizer, MT5ForConditionalGeneration
+import matplotlib.pyplot as plt
 
 # ===============================      Global Variables:      ===============================
 
@@ -55,11 +56,18 @@ def simple_questions(model, tokenizer):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv('outputs/mT5-base-6-epochs/validation_set_with_results.csv')
+    df = pd.read_csv('outputs/mT5-base-6-epochs/validation_set_with_results_old.csv')
     # print(df.groupby(["Dataset"])["F1", "EM"].mean() * 100)
     # print(df.groupby(["Language"])["F1", "EM"].mean() * 100)
-    df = df.loc[df['F1'] >= 0.5].head(20)
-    print(df)
+    (df.groupby(["Type"])["F1", "EM"].mean() * 100).round(2).to_csv("Types.csv")
+    # df = df.loc[df['Dataset'] != "NQ"]  # only parallel datasets
+    # df = df.loc[df['F1'] > 0.5]  # only success answers
+    # df["count"] = 1
+    # df1 = df.groupby(["Id"])["count"].sum()
+    # df1.plot.hist(title='Number of correct languages answers', bins=8)
+    # plt.xlabel('Number of languages')
+    # plt.ylabel('Count')
+    # plt.show()
 
     # # =================================      Load models:      =================================
     # print("[Loading Tokenizer]:")
@@ -70,10 +78,10 @@ if __name__ == "__main__":
     # model2 = MT5ForConditionalGeneration.from_pretrained("outputs/mT5-base-2-epochs/model_files", cache_dir=CACHE_DIR)
     # model6 = MT5ForConditionalGeneration.from_pretrained("outputs/mT5-base-6-epochs/model_files", cache_dir=CACHE_DIR)
 
-    # # =====================      Generate the validation with results:      =====================
-    #
+    # # # =====================      Generate the validation with results:      =====================
+    # #
     # df = pd.read_csv('Datasets/PreprocessDataset.csv')
-    # val_dataset = df[df['Type'] == "dev"]
+    # val_dataset = df[df['DataType'] == "dev"]
     # df = pd.read_csv('outputs/mT5-base-6-epochs/predictions.csv')
     # predictions = df['Generated Text'].tolist()
     # actual = df['Actual Text'].tolist()
@@ -82,4 +90,4 @@ if __name__ == "__main__":
     # val_dataset['Prediction'] = predictions
     # val_dataset['F1'] = result['f1_scores']
     # val_dataset['EM'] = result['exact_match_scores']
-    # val_dataset.to_csv(os.path.join("outputs/mT5-base-6-epochs", "validation_set_with_results.csv"))
+    # val_dataset.to_csv(os.path.join("outputs/mT5-base-6-epochs", "validation_set_with_results_old.csv"))

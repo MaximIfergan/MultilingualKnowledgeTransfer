@@ -225,8 +225,8 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
 
     # Building dataset:
     CONSOLE.log(f"[Dataset]: Building dataset")
-    train_dataset = dataframe[dataframe['Type'] == "train"].reset_index(drop=True)[[source_text, target_text]]
-    val_dataset = dataframe[dataframe['Type'] == "dev"].reset_index(drop=True)[[source_text, target_text]]
+    train_dataset = dataframe[dataframe['DataType'] == "train"].reset_index(drop=True)[[source_text, target_text]]
+    val_dataset = dataframe[dataframe['DataType'] == "dev"].reset_index(drop=True)[[source_text, target_text]]
 
     CONSOLE.print(f"== Datasets Details: ==")
     CONSOLE.print(f"FULL Dataset: {dataframe.shape}")

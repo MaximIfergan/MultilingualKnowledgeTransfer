@@ -20,5 +20,11 @@ print_title("Load models:")
 
 # print_title("Preprocess dataset details:")
 
-# df = pd.read_csv('Datasets/PreprocessDataset.csv')
-# print(df[df["Type"] == "train"].head().reset_index(drop=True)[["Question", "Answer"]])
+# df = pd.read_csv('outputs/mT5-base-6-epochs/validation_set_with_results_old.csv')
+# df[df["Type"] != "short_phrase"].drop(["Unnamed: 0.1"], axis=1).to_csv("outputs/mT5-base-6-epochs/validation_set_with_results.csv", index=False)
+df = pd.DataFrame({'A': [0, 1, 2, 2, 4],
+                   'B': [5, 6, 7, 8, 9],
+                   'C': ['a', 'b', 'c', 'd', 'e']})
+# df[df['C'] == 'd']['A'] = 18
+df.loc[df['A'] == 2, 'A'] = 18
+print(df)
