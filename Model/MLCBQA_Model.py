@@ -9,7 +9,7 @@ import os
 from rich.table import Column, Table
 from rich import box
 from rich.console import Console
-from MLCBQA_Dataset import MLCBQA_Dataset
+from Model.MLCBQA_Dataset import MLCBQA_Dataset
 import sentencepiece
 from transformers import MT5Tokenizer, MT5ForConditionalGeneration
 import wandb
@@ -195,7 +195,7 @@ def evaluate_metrics(gold_answers, predictions):
     return {'exact_match': exact_match, 'f1': f1, 'f1_scores': f1_scores, 'exact_match_scores': exact_match_scores}
 
 
-def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./outputs/"):
+def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./SavedModels/"):
     """
     MT5 trainer
     """
@@ -268,3 +268,27 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.log(f"[Evaluation]: Evaluation Completed")
 
     CONSOLE.save_text(os.path.join(output_dir, "logs.txt"))
+
+
+if __name__ == "__main__":
+    model_params = {
+        "MODEL": "mt5-base",
+        "MODEL_DIR": "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/",
+        "TRAIN_BATCH_SIZE": 8,
+        "VALID_BATCH_SIZE": 8,
+        "TRAIN_EPOCHS": 4,
+        "LEARNING_RATE": 1e-4,
+        "MAX_SOURCE_TEXT_LENGTH": 396,
+        "MAX_TARGET_TEXT_LENGTH": 32,
+        "SEED": 18,
+    }
+
+    df = pd.read_csv('Data/Datasets/PreprocessDataset.csv')
+
+    MT5Trainer(
+        dataframe=df,
+        source_text="Question",
+        target_text="Answer",
+        model_params=model_params,
+        output_dir="Model/SavedModels",
+    )

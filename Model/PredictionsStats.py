@@ -1,11 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import DataPreprocessing
+from Data import DataPreprocessing
+
 
 class PredictionsStats:
 
-    def __init__(self, data_path="outputs/mT5-base-6-epochs/validation_set_with_results.csv"):
+    def __init__(self, data_path="SavedModels/mT5-base-6-epochs/validation_set_with_results.csv"):
         self.data = pd.read_csv(data_path)
 
     def plot_results_by_language(self):
@@ -136,7 +137,7 @@ class PredictionsStats:
             dfgbt = df[df["Type"] == type].groupby('correct')['count'].sum()
             for i in dfgbt.axes[0]:
                 num_of_questions[i - 1] = dfgbt[i]
-            num_of_questions = num_of_questions / np.array(range(1,len(DataPreprocessing.FINETUNING_LANGS) + 1))
+            num_of_questions = num_of_questions / np.array(range(1, len(DataPreprocessing.FINETUNING_LANGS) + 1))
             ax.bar(labels, num_of_questions, width, label=type, bottom=sum)
             sum += num_of_questions
 
@@ -171,8 +172,8 @@ class PredictionsStats:
 if __name__ == "__main__":
     predictionsStats = PredictionsStats()
     predictionsStats.plot_results_by_dataset()
-    predictionsStats.plot_results_by_language()
-    predictionsStats.plot_results_by_type()
-    predictionsStats.plot_number_of_languages_per_question_by_type()
-    predictionsStats.plot_number_of_languages_per_question_by_languages()
-    predictionsStats.plot_types_distribution_for_evaluation_set()
+    # predictionsStats.plot_results_by_language()
+    # predictionsStats.plot_results_by_type()
+    # predictionsStats.plot_number_of_languages_per_question_by_type()
+    # predictionsStats.plot_number_of_languages_per_question_by_languages()
+    # predictionsStats.plot_types_distribution_for_evaluation_set()

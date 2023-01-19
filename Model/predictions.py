@@ -1,11 +1,5 @@
-import MLCBQA_Model
 import pandas as pd
 import torch
-import os
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
-from MLCBQA_Dataset import MLCBQA_Dataset
-from transformers import MT5Tokenizer, MT5ForConditionalGeneration
-import matplotlib.pyplot as plt
 
 # ===============================      Global Variables:      ===============================
 
@@ -56,7 +50,7 @@ def simple_questions(model, tokenizer):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv('outputs/mT5-base-6-epochs/validation_set_with_results_old.csv')
+    df = pd.read_csv('SavedModels/mT5-base-6-epochs/validation_set_with_results_old.csv')
     # print(df.groupby(["Dataset"])["F1", "EM"].mean() * 100)
     # print(df.groupby(["Language"])["F1", "EM"].mean() * 100)
     (df.groupby(["Type"])["F1", "EM"].mean() * 100).round(2).to_csv("Types.csv")
@@ -71,18 +65,18 @@ if __name__ == "__main__":
 
     # # =================================      Load models:      =================================
     # print("[Loading Tokenizer]:")
-    # tokenizer2 = MT5Tokenizer.from_pretrained("outputs/mT5-base-2-epochs/model_files", cache_dir=CACHE_DIR)
-    # tokenizer6 = MT5Tokenizer.from_pretrained("outputs/mT5-base-6-epochs/model_files", cache_dir=CACHE_DIR)
+    # tokenizer2 = MT5Tokenizer.from_pretrained("SavedModels/mT5-base-2-epochs/model_files", cache_dir=CACHE_DIR)
+    # tokenizer6 = MT5Tokenizer.from_pretrained("SavedModels/mT5-base-6-epochs/model_files", cache_dir=CACHE_DIR)
     #
     # print("[Loading Model]:")
-    # model2 = MT5ForConditionalGeneration.from_pretrained("outputs/mT5-base-2-epochs/model_files", cache_dir=CACHE_DIR)
-    # model6 = MT5ForConditionalGeneration.from_pretrained("outputs/mT5-base-6-epochs/model_files", cache_dir=CACHE_DIR)
+    # model2 = MT5ForConditionalGeneration.from_pretrained("SavedModels/mT5-base-2-epochs/model_files", cache_dir=CACHE_DIR)
+    # model6 = MT5ForConditionalGeneration.from_pretrained("SavedModels/mT5-base-6-epochs/model_files", cache_dir=CACHE_DIR)
 
     # # # =====================      Generate the validation with results:      =====================
     # #
     # df = pd.read_csv('Datasets/PreprocessDataset.csv')
     # val_dataset = df[df['DataType'] == "dev"]
-    # df = pd.read_csv('outputs/mT5-base-6-epochs/predictions.csv')
+    # df = pd.read_csv('SavedModels/mT5-base-6-epochs/predictions.csv')
     # predictions = df['Generated Text'].tolist()
     # actual = df['Actual Text'].tolist()
     # result = MLCBQA_Model.evaluate_metrics(actual, predictions)
@@ -90,4 +84,4 @@ if __name__ == "__main__":
     # val_dataset['Prediction'] = predictions
     # val_dataset['F1'] = result['f1_scores']
     # val_dataset['EM'] = result['exact_match_scores']
-    # val_dataset.to_csv(os.path.join("outputs/mT5-base-6-epochs", "validation_set_with_results_old.csv"))
+    # val_dataset.to_csv(os.path.join("SavedModels/mT5-base-6-epochs", "validation_set_with_results_old.csv"))

@@ -13,6 +13,15 @@ FINETUNING_LANGS = ["en",  # English
                     "es",  # Spanish
                     "it",  # Italian
                     "fr"]  # French
+
+# Based on the spotlight DBpedia languages
+FINETUNING_LANGS_NEW = ["en",  # English
+                    "de",  # German
+                    "pt",  # Portuguese
+                    "es",  # Spanish
+                    "it",  # Italian
+                    "fr"]  # French
+
 DATASETS_TYPES = ["binary",
                   "yesno",
                   "comparative",
@@ -107,7 +116,6 @@ class DataPreprocessing:
 
         all_rows = mkqa_all + nq_train + mintaka_train + nq_dev + mintaka_dev
         self.data = pd.DataFrame(all_rows)
-        print(self.data.shape[0])
         self.data = self.data.drop_duplicates(subset=["Id", "Language"])
         self.data.to_csv('Datasets/PreprocessDataset.csv', encoding='utf-8')
 
@@ -222,4 +230,4 @@ if __name__ == "__main__":
     dp = DataPreprocessing()
     dp.preprocess()
     dp.print_dataset_details()
-    # dp.data.to_csv("Datasets/PreprocessDataset.csv")
+    # dp.data.to_csv("Datasets/PreprocessDataset.csv")  # Save the dataset
