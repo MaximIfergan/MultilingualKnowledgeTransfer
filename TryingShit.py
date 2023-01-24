@@ -11,7 +11,7 @@ def print_title(title):
 
 # print_title("Load models:")
 
-nlp = spacy.load('en_core_web_sm')
+# nlp = spacy.load('en_core_web_sm')
 # for name in nlp.pipe_names:
 #     if name != 'ner':
 #         nlp.remove_pipe(name)
@@ -19,19 +19,19 @@ nlp = spacy.load('en_core_web_sm')
 # nlp = spacy.blank("en")
 # nlp = spacy.blank("fr")
 # nlp.add_pipe('dbpedia_spotlight')
-nlp.add_pipe('opentapioca')
+# nlp.add_pipe('opentapioca')
 # ner_pipe = nlp.create_pipe("ner")
 # nlp.add_pipe("ner")
 # doc = nlp('Le président des États-Unis appelle Boris Johnson pour décider quoi faire à propos du coronavirus')
 # doc = nlp('The president of USA is calling Boris Johnson to decide what to do about coronavirus')
 # doc = nlp("when was the last time the lakers made the playoffs?")
-doc = nlp("Los Angeles Lakers")
+# doc = nlp("Los Angeles Lakers")
 # doc = nlp('putin was born in russia')
 # doc = nlp('Chris Young is a famous singer')
 # doc = nlp('twin towers')
-print('Entities', [(ent.text, ent.label_, ent.kb_id_, ent.start, ent.end) for ent in doc.ents])
-for token in doc:
-    print(token.text, token.pos_, token.tag_)
+# print('Entities', [(ent.text, ent.label_, ent.kb_id_, ent.start, ent.end) for ent in doc.ents])
+# for token in doc:
+#     print(token.text, token.pos_, token.tag_)
 # print(doc.ents[0]._.dbpedia_raw_result)
 
 
