@@ -20,7 +20,7 @@ import re
 # ===============================      Global Variables:      ===============================
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-CACHE_DIR = "/cs/labs/oabend/maximifergan/MKT/downloaded_models"
+CACHE_DIR = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/downloaded_models"
 
 # STDOUT Logger init:
 CONSOLE = Console(record=True)
