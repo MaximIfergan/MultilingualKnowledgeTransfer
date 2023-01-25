@@ -11,39 +11,51 @@ def print_title(title):
 
 # print_title("Load models:")
 
-nlp = spacy.load('en_core_web_sm')
+# nlp = spacy.load('en_core_web_sm')
 # for name in nlp.pipe_names:
-#     if name != 'ner':
+#     print(name)
+#     if name == 'lemmatizer':
 #         nlp.remove_pipe(name)
-
-# nlp = spacy.blank("en")
-# nlp = spacy.blank("fr")
-# nlp.add_pipe('dbpedia_spotlight')
-# nlp.add_pipe('opentapioca')
-# ner_pipe = nlp.create_pipe("ner")
-# nlp.add_pipe("ner")
-# doc = nlp('Le président des États-Unis appelle Boris Johnson pour décider quoi faire à propos du coronavirus')
+#
+# # nlp = spacy.blank("en")
+# # nlp = spacy.blank("fr")
+# # nlp.add_pipe('dbpedia_spotlight')
+# # nlp.add_pipe('opentapioca')
+# # ner_pipe = nlp.create_pipe("ner")
+# # nlp.add_pipe("ner")
+# # doc = nlp('Le président des États-Unis appelle Boris Johnson pour décider quoi faire à propos du coronavirus')
 # sent = 'The president of USA is calling Boris Johnson to decide what to do about coronavirus'
-sent = "How long did it take the twin towers to be built?"
-doc = nlp(sent)
-# how long did it take the twin towers to be built?
-# doc = nlp("when was the last time the lakers made the playoffs?")
-# doc = nlp("Los Angeles Lakers")
-# doc = nlp('putin was born in russia')
-# doc = nlp('Chris Young is a famous singer')
-# doc = nlp('twin towers')
-# print('Entities', [(ent.text, ent.label_, ent.kb_id_) for ent in doc.ents])
+# # sent = 'who sings love you like theres no tomorrow?'
+# # sent = "when did the rams play in the super bowl?"
+# doc = nlp(sent)
+# # how long did it take the twin towers to be built?
+# # doc = nlp("when was the last time the lakers made the playoffs?")
+# # doc = nlp("Los Angeles Lakers")
+# # doc = nlp('putin was born in russia')
+# # doc = nlp('Chris Young is a famous singer')
+# # doc = nlp('twin towers')
+# # print('Entities', [(ent.text, ent.label_, ent.kb_id_) for ent in doc.ents])
+# # for ent in doc.ents:
+# #     print(sent[:ent.start_char] + "[START] " + sent[ent.start_char:ent.end_char] + " [END]" + sent[ent.end_char:])
+# #
+# for token in doc:
+#     print(token.text, token.pos_)
+#
+# for chunk in doc.noun_chunks:
+#     print(chunk.text, chunk.start_char, chunk.end_char)
+#
 # for ent in doc.ents:
-#     print(sent[:ent.start_char] + "[START] " + sent[ent.start_char:ent.end_char] + " [END]" + sent[ent.end_char:])
-
-for token in doc:
-    print(token.text, token.pos_, token.dep_)
+#     print(ent)
 
 # for token in doc:
 #     print(token.text, token.pos_, token.tag_)
 # print(doc.ents[0]._.dbpedia_raw_result)
 
-
+# import os
+# ROOT_PATH = os.path.abspath("")
+# FINETUNING_DATA_PATH = ROOT_PATH + "/Data/Datasets/PreprocessDataset.csv"
+# OUTPUT_PATH = ROOT_PATH + "/EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
+# CACHE_DIR = ROOT_PATH + "/downloaded_models"
 # from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 #
 # tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
@@ -65,13 +77,12 @@ for token in doc:
 #
 # res = tokenizer.batch_decode(outputs, skip_special_tokens=True)
 # print(res)
+import pywikibot
+SITE = pywikibot.Site("en", "wikipedia")
 
-data = [json.loads(line) for line in open("Data/Datasets/NQ/nq_train_entities.jsonl", 'r', encoding='utf8')]
-count = 0
-for ex in data:
-    if len(ex["q_entities"]) == 0 and len(ex["a_entities"]) == 0:
-        count += 1
+page = pywikibot.Page(SITE, "Israel")
+item = pywikibot.ItemPage.fromPage(page)
+entity_id = item.id
 
-print(count)
-print(count / 87925)
-# 87925
+# module load cuda/11.1
+# module load torch/1.9-cuda-11.1

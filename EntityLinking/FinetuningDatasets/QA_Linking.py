@@ -8,22 +8,25 @@ from tqdm.auto import tqdm
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import pywikibot
 import os
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 
 # ===============================      Global Variables:      ===============================
 
-ROOT_PATH = os.path.abspath("")
-FINETUNING_DATA_PATH = ROOT_PATH + "Data/Datasets/PreprocessDataset.csv"
-OUTPUT_PATH = ROOT_PATH + "EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
-CACHE_DIR = ROOT_PATH + "downloaded_models"
+# ROOT_PATH = os.path.abspath("")
+FINETUNING_DATA_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/Data/Datasets/PreprocessDataset.csv"
+OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
+CACHE_DIR = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/downloaded_models"
 START_TOKEN = "[START]"
 END_TOKEN = "[END]"
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 NLP = spacy.load('en_core_web_sm')
-for name in NLP.pipe_names:
-    if name != 'ner':
-        NLP.remove_pipe(name)
+NLP.remove_pipe("lemmatizer")
+NLP.remove_pipe("ner")
 # NLP.add_pipe('dbpedia_spotlight')  # pip install spacy-dbpedia-spotlight
 SITE = pywikibot.Site("en", "wikipedia")
+STOP_WORDS = set(stopwords.words('english'))
 
 # ===============================      Global Functions:      ===============================
 
@@ -38,31 +41,48 @@ def link_qa_pair(question, answer, model, tokenizer):
     # a_entities = [ent._.dbpedia_raw_result for ent in a_doc.ents]
 
     # Tag question entities:
-    for ent in q_doc.ents:
-        inf_sent = question[:ent.start_char] + START_TOKEN + " " + \
-                   question[ent.start_char:ent.end_char] + " " + END_TOKEN \
-                   + question[ent.end_char:]
+    for chunk in q_doc.noun_chunks:
+        if chunk.text in STOP_WORDS or chunk.text.startswith("how") or chunk.text.startswith("what"):
+            continue
+        inf_sent = question[:chunk.start_char] + START_TOKEN + " " + \
+                   question[chunk.start_char:chunk.end_char] + " " + END_TOKEN \
+                   + question[chunk.end_char:]
 
-        outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt"), num_beams=2, num_return_sequences=1)
+        outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2, num_return_sequences=1)
         entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
         if not entity:
             continue
-        entity_name, entity_lang = entity[0].split(" >> ")
-        page = pywikibot.Page(SITE, entity_name)
-        item = pywikibot.ItemPage.fromPage(page)
-        entity_id = item.id
-        q_entities.append((entity_name, entity_id))
+        tmp = entity[0].split(" >> ")
+        if len(tmp) == 2:
+            entity_name, entity_lang = tmp
+            try:
+                page = pywikibot.Page(SITE, entity_name)
+                item = pywikibot.ItemPage.fromPage(page)
+                entity_id = item.id
+                q_entities.append((entity_name, entity_id))
+                # print(f"\n ========== text: {chunk.text} , entity: {entity_name}\n")
+            except pywikibot.exceptions.NoPageError:
+                # print(f"\nPage {entity_name} not found ")
+                pass
 
     # Tag answer entities:
-    inf_sent = question + " " + START_TOKEN + " " + answer + " " + END_TOKEN
-    outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt"), num_beams=2, num_return_sequences=1)
+    inf_sent = START_TOKEN + " " + answer + " " + END_TOKEN
+    outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2, num_return_sequences=1)
     entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     if entity:
-        entity_name, entity_lang = entity[0].split(" >> ")
-        page = pywikibot.Page(SITE, entity_name)
-        item = pywikibot.ItemPage.fromPage(page)
-        entity_id = item.id
-        a_entities.append((entity_name, entity_id))
+        tmp = entity[0].split(" >> ")
+        if len(tmp) == 2:
+            entity_name, entity_lang = entity[0].split(" >> ")
+            try:
+                page = pywikibot.Page(SITE, entity_name)
+                item = pywikibot.ItemPage.fromPage(page)
+                entity_id = item.id
+                a_entities.append((entity_name, entity_id))
+                # print(f"\n ========== text: {answer} , entity: {item.aliases._data['en'][0]}")
+                # print(f"\n ========== text: {answer} , entity: {entity_name}")
+            except pywikibot.exceptions.NoPageError:
+                # print(f"\nPage {entity_name} not found ")
+                pass
 
     return {'q_entities': q_entities,
             'a_entities': a_entities}
@@ -70,24 +90,24 @@ def link_qa_pair(question, answer, model, tokenizer):
 
 def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, output_path=OUTPUT_PATH):
     df = pd.read_csv(input_path)
-    data = df[["Question", "Answer", "Id", "Language"]].to_numpy()
+    data = df[["Question", "Answer", "Id", "Language", "Dataset"]].to_numpy()
     with open(output_path, 'w') as outfile:
         with jsonlines.Writer(outfile) as writer:
             for i in tqdm(range(data.shape[0])):
-                if data[i][3] != "en":
+                if data[i][3] != "en" or data[i][4] == "Mintaka":
                     continue
                 qa_entities = link_qa_pair(data[i][0], data[i][1], model, tokenizer)
                 qa_entities["Id"] = data[i][2]
                 writer.write(qa_entities)
 
 
-if __name__ == "__main__":
-    # tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
-    # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval()
-    # link_finetuning_dataset(model, tokenizer)
-    tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki")
-    model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki").eval()
+def main():
+    tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
+    model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval().to(DEVICE)
     link_finetuning_dataset(model, tokenizer)
+    # tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki")
+    # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki").eval()
+    # link_finetuning_dataset(model, tokenizer)
 
 # =======================================  mGenre with HG====================================================
 
