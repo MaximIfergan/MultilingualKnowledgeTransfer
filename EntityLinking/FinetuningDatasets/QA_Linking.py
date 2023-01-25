@@ -7,10 +7,11 @@ import numpy as np
 from tqdm.auto import tqdm
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import pywikibot
+import os
 
 # ===============================      Global Variables:      ===============================
 
-ROOT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/"
+ROOT_PATH = os.path.abspath("")
 FINETUNING_DATA_PATH = ROOT_PATH + "Data/Datasets/PreprocessDataset.csv"
 OUTPUT_PATH = ROOT_PATH + "EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
 CACHE_DIR = ROOT_PATH + "downloaded_models"
@@ -81,8 +82,11 @@ def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, o
 
 
 if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
-    model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval()
+    # tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
+    # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval()
+    # link_finetuning_dataset(model, tokenizer)
+    tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki")
+    model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki").eval()
     link_finetuning_dataset(model, tokenizer)
 
 # =======================================  mGenre with HG====================================================
