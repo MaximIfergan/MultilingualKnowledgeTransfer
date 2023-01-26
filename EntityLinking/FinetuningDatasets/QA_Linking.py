@@ -16,7 +16,7 @@ from nltk.corpus import stopwords
 
 # ROOT_PATH = os.path.abspath("")
 FINETUNING_DATA_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/Data/Datasets/PreprocessDataset.csv"
-OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
+OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities2.json"
 CACHE_DIR = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/downloaded_models"
 START_TOKEN = "[START]"
 END_TOKEN = "[END]"
@@ -44,9 +44,9 @@ def link_qa_pair(question, answer, model, tokenizer):
     for chunk in q_doc.noun_chunks:
         if chunk.text in STOP_WORDS or chunk.text.startswith("how") or chunk.text.startswith("what"):
             continue
-        inf_sent = question[:chunk.start_char] + START_TOKEN + " " + \
-                   question[chunk.start_char:chunk.end_char] + " " + END_TOKEN \
-                   + question[chunk.end_char:]
+        inf_sent = str(question[:chunk.start_char]) + START_TOKEN + " " + \
+                   str(question[chunk.start_char:chunk.end_char]) + " " + END_TOKEN \
+                   + str(question[chunk.end_char:])
 
         outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2, num_return_sequences=1)
         entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
@@ -66,7 +66,7 @@ def link_qa_pair(question, answer, model, tokenizer):
                 pass
 
     # Tag answer entities:
-    inf_sent = START_TOKEN + " " + answer + " " + END_TOKEN
+    inf_sent = START_TOKEN + " " + str(answer) + " " + END_TOKEN
     outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2, num_return_sequences=1)
     entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     if entity:
@@ -91,10 +91,13 @@ def link_qa_pair(question, answer, model, tokenizer):
 def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, output_path=OUTPUT_PATH):
     df = pd.read_csv(input_path)
     data = df[["Question", "Answer", "Id", "Language", "Dataset"]].to_numpy()
+    flag = True  # Start from the QA when the bug stops
     with open(output_path, 'w') as outfile:
         with jsonlines.Writer(outfile) as writer:
             for i in tqdm(range(data.shape[0])):
-                if data[i][3] != "en" or data[i][4] == "Mintaka":
+                if str(data[i][2]) == "4529749965014481176":
+                    flag = False
+                if flag or data[i][3] != "en" or data[i][4] == "Mintaka":
                     continue
                 qa_entities = link_qa_pair(data[i][0], data[i][1], model, tokenizer)
                 qa_entities["Id"] = data[i][2]
