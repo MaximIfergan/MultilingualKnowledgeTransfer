@@ -16,7 +16,7 @@ from nltk.corpus import stopwords
 
 # ROOT_PATH = os.path.abspath("")
 FINETUNING_DATA_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/Data/Datasets/PreprocessDataset.csv"
-OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities2.json"
+OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities3.json"
 CACHE_DIR = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/downloaded_models"
 START_TOKEN = "[START]"
 END_TOKEN = "[END]"
@@ -53,7 +53,7 @@ def link_qa_pair(question, answer, model, tokenizer):
         if not entity:
             continue
         tmp = entity[0].split(" >> ")
-        if len(tmp) == 2:
+        if len(tmp) == 2 and tmp[0] != "":
             entity_name, entity_lang = tmp
             try:
                 page = pywikibot.Page(SITE, entity_name)
@@ -71,7 +71,7 @@ def link_qa_pair(question, answer, model, tokenizer):
     entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     if entity:
         tmp = entity[0].split(" >> ")
-        if len(tmp) == 2:
+        if len(tmp) == 2 and tmp[0] != "":
             entity_name, entity_lang = entity[0].split(" >> ")
             try:
                 page = pywikibot.Page(SITE, entity_name)
@@ -95,7 +95,7 @@ def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, o
     with open(output_path, 'w') as outfile:
         with jsonlines.Writer(outfile) as writer:
             for i in tqdm(range(data.shape[0])):
-                if str(data[i][2]) == "4529749965014481176":
+                if str(data[i][2]) == "-698998810552368476":
                     flag = False
                 if flag or data[i][3] != "en" or data[i][4] == "Mintaka":
                     continue
