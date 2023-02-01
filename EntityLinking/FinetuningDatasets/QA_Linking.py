@@ -16,7 +16,7 @@ from nltk.corpus import stopwords
 
 # ROOT_PATH = os.path.abspath("")
 FINETUNING_DATA_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/Data/Datasets/PreprocessDataset.csv"
-OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities4.json"
+OUTPUT_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities5.json"
 CACHE_DIR = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/downloaded_models"
 START_TOKEN = "[START]"
 END_TOKEN = "[END]"
@@ -99,7 +99,7 @@ def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, o
     with open(output_path, 'w') as outfile:
         with jsonlines.Writer(outfile) as writer:
             for i in tqdm(range(data.shape[0])):
-                if str(data[i][2]) == "-7034168441142865639":
+                if str(data[i][2]) == "-963872017918043146":
                     flag = False
                 if flag or data[i][3] != "en" or data[i][4] == "Mintaka":
                     continue
