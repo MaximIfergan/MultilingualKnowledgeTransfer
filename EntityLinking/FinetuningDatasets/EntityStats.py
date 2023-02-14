@@ -180,44 +180,49 @@ def add_pretraining_dataset_appearance(final_df):
     final_df["c4"] = -1
     final_df["roots"] = -1
     count = 0
+    num_of_not_found = 0
+    num_of_found = 0
     for index, row in tqdm(final_df.iterrows()):
-        if count >= 100:
-            break
+        # if count >= 100:
+        #     break
         key = row["dbpedia_uri"]
         try:
             final_df[final_df["index"] == index]["c4"] = c4[key].shape[0]
-            print("OK")
+            num_of_found += 1
         except KeyError:
-            print(f"c4: didn't found {key}")
+            # print(f"c4: didn't found {key}")
+            num_of_not_found += 1
         try:
             final_df[final_df["index"] == index]["roots"] = roots[key].shape[0]
-            print("OK")
+            num_of_found += 1
         except KeyError:
-            print(f"roots: didn't found {key}")
+            # print(f"roots: didn't found {key}")
+            num_of_not_found += 1
         count += 1
+    print(f"num_of_found =  {num_of_found}, num_of_not_found = {num_of_not_found}")
     return final_df
 
 def main():
-    # df = pd.read_csv('entities_stats.csv')
-    # final_df = add_pretraining_dataset_appearance(df)
-    # final_df.to_csv("entities_stats_final.csv")
-    count = 0
-    c4 = np.load(c4path)
-    # for key in c4.keys():
-    #     print(key)
-    #     count += 1
-    #     if count >= 5:
-    #         break
-    keys = ["http://dbpedia.org/resource/Nitrous_oxide",
-    "http://dbpedia.org/resource/Recycling_bin",
-    "http://dbpedia.org/resource/Mazda_Millenia",
-    "http://dbpedia.org/resource/Medication",
-    "http://dbpedia.org/resource/Rock_music"]
-    for key in keys:
-        try:
-            print(c4[key].shape[0])
-        except KeyError:
-            print(f"c4: didn't found {key}")
+    df = pd.read_csv('entities_stats.csv')
+    final_df = add_pretraining_dataset_appearance(df)
+    final_df.to_csv("entities_stats_final.csv")
+    # count = 0
+    # c4 = np.load(c4path)
+    # # for key in c4.keys():
+    # #     print(key)
+    # #     count += 1
+    # #     if count >= 5:
+    # #         break
+    # keys = ["http://dbpedia.org/resource/Nitrous_oxide",
+    # "http://dbpedia.org/resource/Recycling_bin",
+    # "http://dbpedia.org/resource/Mazda_Millenia",
+    # "http://dbpedia.org/resource/Medication",
+    # "http://dbpedia.org/resource/Rock_music"]
+    # for key in keys:
+    #     try:
+    #         print(c4[key].shape[0])
+    #     except KeyError:
+    #         print(f"c4: didn't found {key}")
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
