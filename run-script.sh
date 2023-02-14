@@ -8,7 +8,7 @@
 #SBATCH -t 0-20:30:00  # time requested in hour:minute:second
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 #SBATCH --mail-user=maxim.ifergan@mail.huji.ac.il
-#SBATCH --gres=gpu:1,vmem:10g
+#SBATCH --gres=gpu:1,vmem:6g
 
 source /cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/venv/bin/activate.csh
-/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/venv/bin/python /cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/main.py
+/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/venv/bin/python /cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/TryingShit.py
