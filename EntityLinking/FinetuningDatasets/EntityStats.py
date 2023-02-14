@@ -179,22 +179,26 @@ def add_pretraining_dataset_appearance(final_df):
     roots = np.load(rootspath)
     final_df["c4"] = -1
     final_df["roots"] = -1
-    for index, row in final_df.iterrows():
-        pass
-
-
-
+    count = 0
+    for index, row in tqdm(final_df.iterrows()):
+        if count >= 10:
+            break
+        key = row["dbpedia_uri"]
+        try:
+            final_df[final_df["index"] == index]["c4"] = c4[key].shape[0]
+        except KeyError:
+            print(f"c4: didn't found {key}")
+        try:
+            final_df[final_df["index"] == index]["roots"] = roots[key].shape[0]
+        except KeyError:
+            print(f"roots: didn't found {key}")
+        count += 1
+    return final_df
 
 def main():
-    # training_entities = np.load("EntityLinking\PretrainingDatasets\wikipedia_entity_map.npz")
-    # training_entities = sort_entity_map(training_entities)
-    # print(get_number_of_appearance_in_pretraining(training_entities, 'Q1617977'))
-    # sample_appearance_in_pretraining(training_entities, output_path="try.json", sample_num=10000)
-    # print(get_number_of_appearance_in_pretraining(training_entities, 'Q22686'))
-    # build_entity_stats()
-    # df = pd.read_csv('MKQA_entities.csv', index_col=None)
-    # mintaka_entities()
-    popqa_entities()
+    df = pd.read_csv('MKQA_entities.csv')
+    final_df = add_pretraining_dataset_appearance(df)
+    df.to_csv("entities_stats.csv")
 
 
 # # =============== Check for number of page views in wikipedia with page view: ======================

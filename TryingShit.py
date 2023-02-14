@@ -115,7 +115,14 @@ def print_title(title):
 # string = "hello my name is maxim"
 # new_string = "_".join([w.capitalize() for w in string.split()])
 # print(new_string)
+#
+# from huggingface_hub import hf_hub_download
+#
+# hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
 
-from huggingface_hub import hf_hub_download
-
-hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
+df1 = pd.read_csv('MKQA_entities.csv')
+df2 = pd.read_csv("NQ_entities.csv")
+df3 = pd.read_csv('Mintaka_entities.csv')
+df4 = pd.read_csv("Result_PopQA.csv")
+df = pd.concat([df1, df2, df3, df4], ignore_index=True)
+df.to_csv("entities_stats.csv")
