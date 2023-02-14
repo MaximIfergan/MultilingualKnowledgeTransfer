@@ -61,7 +61,7 @@ def get_number_of_appearance_in_pretraining(training_entities, entity_id):
         number_of_appearance = training_entities[uri].shape[0]
     else:
         number_of_appearance = None
-    return number_of_appearance
+    return uri, number_of_appearance
 
 
 def sample_appearance_in_pretraining(entity_map, output_path, sample_num=10000):
@@ -83,30 +83,65 @@ def sample_appearance_in_pretraining(entity_map, output_path, sample_num=10000):
 def build_entity_stats():
     df = pd.DataFrame({"name": [], "source": [],
                        "qa_id": [], "daily_views": [],
-                       "wikipedia": [], "lang": []})
-    flag = True
+                       "wikipedia": [], "lang": [],
+                       "dbpedia_uri": []})
+    flag_dataset = True
     training_entities = np.load("EntityLinking\PretrainingDatasets\wikipedia_entity_map.npz")
     count = 0
-    for line in tqdm(
-            open("EntityLinking/FinetuningDatasets/Results/finetuning_entities_all.json", 'r', encoding="utf8")):
+    for line in open("EntityLinking/FinetuningDatasets/Results/finetuning_entities_all.json", 'r', encoding="utf8"):
         qa = json.loads(line)
-        count += 1
         if qa["Id"] == "5655493461695504401":
-            flag = False
+            flag_dataset = False
+        if (flag_dataset and count >= 250) or count >= 500:
+            continue
+        if count % 20 == 0:
+            print(f"count = {count}")
         for entity in qa["q_entities"] + qa["a_entities"]:
             entity_id = entity[1]
-            entity_wikipedia = get_number_of_appearance_in_pretraining(training_entities, entity_id)
+            key, entity_wikipedia = get_number_of_appearance_in_pretraining(training_entities, entity_id)
             if entity_wikipedia is None:
                 continue
             entity_name = entity[0]
             entity_daily_views = get_daily_average_page_view(entity_id, 'en')
             qa_id = qa["Id"]
-            entity_source = "MKQA" if flag else "NQ"
-            df.loc[entity_id] = [entity_name, entity_source, qa_id, entity_daily_views, entity_wikipedia, 'en']
-        if count >= 50:
-            break
-    df.to_csv("first_try.csv")
+            entity_source = "MKQA" if flag_dataset else "NQ"
+            df.loc[entity_id] = [entity_name, entity_source, qa_id, entity_daily_views, entity_wikipedia, 'en', key]
+            count += 1
+    df.to_csv("Result.csv")
 
+
+def add_mintaka_entities(path, data_type):
+    data_rows = []
+    with open(path, 'r', encoding='utf-8') as fp:
+        data = json.load(fp)
+        for qa in data:
+
+            # Filter:
+            if qa['answer']['answer'] is not None and len(qa['answer']['answer']) > 1:
+                continue
+
+            # extract answer
+            if qa['answer']['answer'] is None or qa['answer']['answerType'] in ["boolean", "date", "string"]:
+                answer = {lang: qa['answer']['mention'] for lang in FINETUNING_LANGS}
+            elif qa['answer']['answerType'] == "numerical":
+                answer = {lang: qa['answer']['answer'][0] for lang in FINETUNING_LANGS}
+            else:
+                answer = qa['answer']['answer'][0]['label']
+            for lang in FINETUNING_LANGS:
+                question = str(qa["translations"][lang] if lang != 'en' else qa["question"]).replace("\n", "")
+                question = question if question[-1] == '?' else question + '?'
+                if str(answer[lang]).replace("\n", "") in ['None', ""]:
+                    continue
+                data_rows.append({
+                    "Dataset": "Mintaka",
+                    "DataType": data_type,
+                    "Type": qa["complexityType"],
+                    "Id": str(qa["id"]),
+                    "Language": lang,
+                    "Question": question,
+                    "Answer": str(answer[lang]).replace("\n", "")
+                })
+    return data_rows
 
 def main():
     # training_entities = np.load("EntityLinking\PretrainingDatasets\wikipedia_entity_map.npz")

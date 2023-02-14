@@ -118,5 +118,4 @@ def print_title(title):
 
 from huggingface_hub import hf_hub_download
 
-hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="c4_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
-hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="roots_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
+hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
