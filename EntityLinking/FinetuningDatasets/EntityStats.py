@@ -181,31 +181,33 @@ def add_pretraining_dataset_appearance(final_df):
     final_df["roots"] = -1
     count = 0
     for index, row in tqdm(final_df.iterrows()):
-        if count >= 10:
+        if count >= 200:
             break
         key = row["dbpedia_uri"]
         try:
             final_df[final_df["index"] == index]["c4"] = c4[key].shape[0]
+            print("OK")
         except KeyError:
             print(f"c4: didn't found {key}")
         try:
             final_df[final_df["index"] == index]["roots"] = roots[key].shape[0]
+            print("OK")
         except KeyError:
             print(f"roots: didn't found {key}")
         count += 1
     return final_df
 
 def main():
-    # df = pd.read_csv('entities_stats.csv')
-    # final_df = add_pretraining_dataset_appearance(df)
-    # final_df.to_csv("entities_stats_final.csv")
-    count = 0
-    c4 = np.load(c4path)
-    for key in c4.keys():
-        print(key)
-        count += 1
-        if count >= 5:
-            break
+    df = pd.read_csv('entities_stats.csv')
+    final_df = add_pretraining_dataset_appearance(df)
+    final_df.to_csv("entities_stats_final.csv")
+    # count = 0
+    # c4 = np.load(c4path)
+    # for key in c4.keys():
+    #     print(key)
+    #     count += 1
+    #     if count >= 5:
+    #         break
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
