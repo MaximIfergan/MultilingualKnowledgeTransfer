@@ -120,9 +120,5 @@ def print_title(title):
 #
 # hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
 
-df1 = pd.read_csv('MKQA_entities.csv')
-df2 = pd.read_csv("NQ_entities.csv")
-df3 = pd.read_csv('Mintaka_entities.csv')
-df4 = pd.read_csv("Result_PopQA.csv")
-df = pd.concat([df1, df2, df3, df4], ignore_index=True)
-df.to_csv("entities_stats.csv")
+df = pd.read_csv("entities_stats.csv")
+print(df["daily_views"].corr(df["wikipedia"]))
