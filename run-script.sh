@@ -11,4 +11,4 @@
 #SBATCH --gres=gpu:1,vmem:6g
 
 source /cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/venv/bin/activate.csh
-/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/venv/bin/python /cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/TryingShit.py
+/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/venv/bin/python /cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/main.py
