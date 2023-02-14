@@ -8,6 +8,8 @@ from tqdm.auto import tqdm
 import numpy as np
 import json
 
+wikipath = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/wikipedia_entity_map.npz"
+
 CLIENT = Client()
 
 
@@ -115,7 +117,7 @@ def mintaka_entities():
                        "qa_id": [], "daily_views": [],
                        "wikipedia": [], "lang": [],
                        "dbpedia_uri": []})
-    training_entities = np.load("EntityLinking\PretrainingDatasets\wikipedia_entity_map.npz")
+    training_entities = np.load(wikipath)
     count = 0
     with open("Data/Datasets/Mintaka/mintaka_train.json", 'r', encoding='utf-8') as fp:
         data = json.load(fp)
