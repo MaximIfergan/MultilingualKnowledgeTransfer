@@ -196,7 +196,7 @@ def add_pretraining_dataset_appearance(final_df):
     return final_df
 
 def main():
-    df = pd.read_csv('MKQA_entities.csv')
+    df = pd.read_csv('entities_stats.csv')
     final_df = add_pretraining_dataset_appearance(df)
     final_df.to_csv("entities_stats_final.csv")
 
