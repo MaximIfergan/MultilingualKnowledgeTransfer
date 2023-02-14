@@ -198,7 +198,7 @@ def add_pretraining_dataset_appearance(final_df):
 def main():
     df = pd.read_csv('MKQA_entities.csv')
     final_df = add_pretraining_dataset_appearance(df)
-    df.to_csv("entities_stats.csv")
+    final_df.to_csv("entities_stats_final.csv")
 
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
