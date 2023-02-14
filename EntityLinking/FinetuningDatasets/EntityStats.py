@@ -1,6 +1,6 @@
 import random
 import pandas as pd
-from mwviews.api import PageviewsClient
+# from mwviews.api import PageviewsClient
 from wikidata.client import Client
 import pywikibot.data.api as api
 import pywikibot
@@ -88,7 +88,7 @@ def build_entity_stats():
                        "wikipedia": [], "lang": [],
                        "dbpedia_uri": []})
     flag_dataset = True
-    training_entities = np.load("EntityLinking\PretrainingDatasets\wikipedia_entity_map.npz")
+    training_entities = np.load(wikipath)
     count = 0
     for line in open("EntityLinking/FinetuningDatasets/Results/finetuning_entities_all.json", 'r', encoding="utf8"):
         qa = json.loads(line)
@@ -165,7 +165,7 @@ def add_popqa_entities(df):
         count += 1
         if count % 20 == 0:
             print(count)
-    df.to_csv("Result_adding_PopQA.csv")
+    df.to_csv("Result_PopQA.csv")
 
 
 def add_pretraining_dataset_appearance():
@@ -178,9 +178,9 @@ def main():
     # print(get_number_of_appearance_in_pretraining(training_entities, 'Q1617977'))
     # sample_appearance_in_pretraining(training_entities, output_path="try.json", sample_num=10000)
     # print(get_number_of_appearance_in_pretraining(training_entities, 'Q22686'))
-    # build_entity_stats()
+    build_entity_stats()
     # df = pd.read_csv('MKQA_entities.csv', index_col=None)
-    mintaka_entities()
+    # mintaka_entities()
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
