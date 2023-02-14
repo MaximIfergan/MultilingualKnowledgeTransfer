@@ -203,11 +203,21 @@ def main():
     # final_df.to_csv("entities_stats_final.csv")
     count = 0
     c4 = np.load(c4path)
-    for key in c4.keys():
-        print(key)
-        count += 1
-        if count >= 5:
-            break
+    # for key in c4.keys():
+    #     print(key)
+    #     count += 1
+    #     if count >= 5:
+    #         break
+    keys = ["http://dbpedia.org/resource/Nitrous_oxide",
+    "http://dbpedia.org/resource/Recycling_bin",
+    "http://dbpedia.org/resource/Mazda_Millenia",
+    "http://dbpedia.org/resource/Medication",
+    "http://dbpedia.org/resource/Rock_music"]
+    for key in keys:
+        try:
+            print(c4[key].shape[0])
+        except KeyError:
+            print(f"c4: didn't found {key}")
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
