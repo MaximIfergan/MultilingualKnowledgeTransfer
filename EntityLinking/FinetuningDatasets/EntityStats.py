@@ -9,6 +9,8 @@ import numpy as np
 import json
 
 wikipath = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/wikipedia_entity_map.npz"
+rootspath = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/roots_entity_map.npz"
+c4path = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/c4_entity_map.npz"
 
 CLIENT = Client()
 
@@ -155,7 +157,7 @@ def popqa_entities():
     data = pd.read_csv('Data/Datasets/POPQA/popQA.tsv', sep='\t')
     s_data = data.sample(frac=1).reset_index(drop=True)
     for index, row in s_data.iterrows():
-        if count >= 5:
+        if count >= 500:
             break
         entity_id = row["s_uri"].split("/")[-1]
         entity_name = row["s_wiki_title"]
@@ -167,12 +169,20 @@ def popqa_entities():
         entity_source = "PopQA"
         df.loc[entity_id] = [entity_name, entity_source, qa_id, entity_daily_views, entity_wikipedia, 'en', key]
         count += 1
-        print(count)
+        if count % 20 == 0:
+            print(count)
     df.to_csv("Result_PopQA.csv")
 
 
-def add_pretraining_dataset_appearance():
-    pass
+def add_pretraining_dataset_appearance(final_df):
+    c4 = np.load(c4path)
+    roots = np.load(rootspath)
+    final_df["c4"] = -1
+    final_df["roots"] = -1
+    for index, row in final_df.iterrows():
+        pass
+
+
 
 
 def main():
