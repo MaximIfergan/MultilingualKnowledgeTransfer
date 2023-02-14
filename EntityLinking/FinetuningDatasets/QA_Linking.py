@@ -9,7 +9,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import pywikibot
 import os
 import nltk
-nltk.download('stopwords')
+# nltk.download('stopwords')
 from nltk.corpus import stopwords
 
 # ===============================      Global Variables:      ===============================
@@ -28,11 +28,11 @@ NLP.remove_pipe("ner")
 SITE = pywikibot.Site("en", "wikipedia")
 STOP_WORDS = set(stopwords.words('english'))
 
+
 # ===============================      Global Functions:      ===============================
 
 
 def link_qa_pair(question, answer, model, tokenizer):
-
     q_doc = NLP(question)
     q_entities, a_entities = [], []
 
@@ -48,7 +48,8 @@ def link_qa_pair(question, answer, model, tokenizer):
                    str(question[chunk.start_char:chunk.end_char]) + " " + END_TOKEN \
                    + str(question[chunk.end_char:])
 
-        outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2, num_return_sequences=1)
+        outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2,
+                                 num_return_sequences=1)
         entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
         if not entity:
             continue
@@ -118,7 +119,8 @@ def main():
     # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki").eval()
     # link_finetuning_dataset(model, tokenizer)
 
-# =======================================  mGenre with HG====================================================
+
+# =======================================  mGenre with HG ====================================================
 
 # from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
@@ -144,7 +146,7 @@ def main():
 # res = tokenizer.batch_decode(outputs, skip_special_tokens=True)
 # print(res)
 
-# =======================================  mGenre not with HG====================================================
+# =======================================  mGenre not with HG ====================================================
 
 
 # import pickle
@@ -174,35 +176,3 @@ def main():
 #     marginalize=True,
 # )
 
-
-# # ================================ Check for number of page views in wikipedia: ==================================
-#
-# from mwviews.api import PageviewsClient
-# p = PageviewsClient(user_agent="<person@organization.org> Selfie, Cat, and Dog analysis")
-# res = p.article_views('en.wikipedia', ['Lionel Messi'], granularity="monthly", start="20221201")
-# print(res)
-
-
-# # ===================================== Check details about wikidata entities:   =====================================
-#
-# import pywikibot
-#
-# site = pywikibot.Site("en", "wikipedia")
-# page = pywikibot.Page(site, "Israel")
-# item = pywikibot.ItemPage.fromPage(page)
-# item_dict = item.get()
-# print(item_dict["labels"])  # Prints the entities name in different languages
-# clm_dict = item_dict["claims"]   # Statements:
-# clm_list = clm_dict["P361"]   # Part-of:
-# for clm in clm_list:  # Print entities that are part of
-#     print("Q" + str(clm.toJSON()["mainsnak"]["datavalue"]["value"]["numeric-id"]))
-
-
-# from wikidata.client import Client
-#
-# client = Client()
-# entity = client.get('Q801', load=True)
-# print(entity.description)
-# rel = client.get('P361')
-# print(rel.description)
-# print(entity[rel].description)

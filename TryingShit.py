@@ -1,13 +1,17 @@
 import json
+
+import jsonlines
 import pandas as pd
 import spacy
 import numpy as np
+
 
 def print_title(title):
     res = "      " + title + "      "
     while (len(res) < 90):
         res = "=" + res + "="
     print("# " + res)
+
 
 # print_title("Load models:")
 
@@ -77,12 +81,41 @@ def print_title(title):
 #
 # res = tokenizer.batch_decode(outputs, skip_special_tokens=True)
 # print(res)
-import pywikibot
-SITE = pywikibot.Site("en", "wikipedia")
-
-page = pywikibot.Page(SITE, "Israel")
-item = pywikibot.ItemPage.fromPage(page)
-entity_id = item.id
-
-# module load cuda/11.1
+# import pywikibot
+# SITE = pywikibot.Site("en", "wikipedia")
+#
+# page = pywikibot.Page(SITE, "Israel")
+# item = pywikibot.ItemPage.fromPage(page)
+# entity_id = item.id
+#
+# # module load cuda/11.1
 # module load torch/1.9-cuda-11.1
+
+# files = ['EntityLinking/FinetuningDatasets/Results/finetuning_entities.json',
+#          'EntityLinking/FinetuningDatasets/Results/finetuning_entities2.json',
+#          'EntityLinking/FinetuningDatasets/Results/finetuning_entities3.json',
+#          "EntityLinking/FinetuningDatasets/Results/finetuning_entities4.json",
+#          "EntityLinking/FinetuningDatasets/Results/finetuning_entities5.json"]
+#
+#
+# def merge_JsonFiles(filename):
+#     result = list()
+#     for f1 in filename:
+#         tmp = [json.loads(line) for line in open(f1, 'r', encoding="utf8")]
+#         result.extend(tmp)
+#
+#     with open('EntityLinking/FinetuningDatasets/Results/finetuning_entities_all.json', 'w', encoding="utf8") as output_file:
+#         with jsonlines.Writer(output_file) as writer:
+#             for i in range(len(result)):
+#                 writer.write(result[i])
+#
+#
+# merge_JsonFiles(files)
+
+# string = "hello my name is maxim"
+# new_string = "_".join([w.capitalize() for w in string.split()])
+# print(new_string)
+
+from huggingface_hub import hf_hub_download
+
+hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="README.md", repo_type="dataset", cache_dir="")
