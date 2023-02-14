@@ -146,7 +146,11 @@ def mintaka_entities():
 
 
 def add_popqa_entities(df):
-    training_entities = np.load("EntityLinking\PretrainingDatasets\wikipedia_entity_map.npz")
+    df = pd.DataFrame({"name": [], "source": [],
+                       "qa_id": [], "daily_views": [],
+                       "wikipedia": [], "lang": [],
+                       "dbpedia_uri": []})
+    training_entities = np.load(wikipath)
     count = 0
     data = pd.read_csv('Data/Datasets/POPQA/popQA.tsv', sep='\t')
     s_data = data.sample(frac=1).reset_index(drop=True)
@@ -161,7 +165,7 @@ def add_popqa_entities(df):
         entity_daily_views = get_daily_average_page_view(entity_id, 'en')
         qa_id = row["id"]
         entity_source = "PopQA"
-        df.append([entity_id, entity_name, entity_source, qa_id, entity_daily_views, entity_wikipedia, 'en', key])
+        df.loc[entity_id] = [entity_name, entity_source, qa_id, entity_daily_views, entity_wikipedia, 'en', key]
         count += 1
         if count % 20 == 0:
             print(count)
@@ -178,9 +182,9 @@ def main():
     # print(get_number_of_appearance_in_pretraining(training_entities, 'Q1617977'))
     # sample_appearance_in_pretraining(training_entities, output_path="try.json", sample_num=10000)
     # print(get_number_of_appearance_in_pretraining(training_entities, 'Q22686'))
-    build_entity_stats()
+    # build_entity_stats()
     # df = pd.read_csv('MKQA_entities.csv', index_col=None)
-    # mintaka_entities()
+    mintaka_entities()
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
