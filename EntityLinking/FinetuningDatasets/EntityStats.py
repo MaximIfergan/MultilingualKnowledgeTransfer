@@ -181,26 +181,26 @@ def add_pretraining_dataset_appearance(final_df):
     # roots = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
     final_df["c4"] = -1
     final_df["roots"] = -1
-    count = 0
+    # count = 0
     num_of_not_found = 0
     num_of_found = 0
     for index, row in tqdm(final_df.iterrows()):
-        if count >= 10:
-            break
+        # if count >= 10:
+        #     break
         key = row["dbpedia_uri"]
         try:
             final_df.at[index, "c4"] = c4[key].shape[0]
             num_of_found += 1
         except KeyError:
             print(f"c4: didn't found {key}")
-            # num_of_not_found += 1
+            num_of_not_found += 1
         try:
             final_df.at[index, "roots"] = roots[key].shape[0]
-            # num_of_found += 1
+            num_of_found += 1
         except KeyError:
             print(f"roots: didn't found {key}")
-            # num_of_not_found += 1
-        count += 1
+            num_of_not_found += 1
+        # count += 1
     print(f"num_of_found =  {num_of_found}, num_of_not_found = {num_of_not_found}")
     return final_df
 
