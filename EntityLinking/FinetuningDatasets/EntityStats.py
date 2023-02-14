@@ -181,7 +181,7 @@ def add_pretraining_dataset_appearance(final_df):
     final_df["roots"] = -1
     count = 0
     for index, row in tqdm(final_df.iterrows()):
-        if count >= 200:
+        if count >= 100:
             break
         key = row["dbpedia_uri"]
         try:
