@@ -4,7 +4,7 @@ import jsonlines
 import pandas as pd
 import spacy
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def print_title(title):
     res = "      " + title + "      "
@@ -120,5 +120,8 @@ def print_title(title):
 #
 # hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
 
-df = pd.read_csv("entities_stats.csv")
-print(df["daily_views"].corr(df["wikipedia"]))
+df = pd.read_csv("entities_stats_final.csv")
+df = df[df["source"] == "PopQA"]
+print(df["daily_views"].corr(df["c4"]))
+# df.hist(bins=3)
+# plt.show()

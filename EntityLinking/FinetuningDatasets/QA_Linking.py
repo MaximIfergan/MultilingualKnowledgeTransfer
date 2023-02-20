@@ -33,26 +33,41 @@ STOP_WORDS = set(stopwords.words('english'))
 
 
 def link_qa_pair(question, answer, model, tokenizer):
-    q_doc = NLP(question)
+    """
+    this function links the entities in a given question and answer
+    :param question: (String) the question
+    :param answer: (String) the answer
+    :param model: facebook mGENRE model
+    :param tokenizer: facebook mGENRE tokenizer
+    :return: A python dictionary that contain the question and answer entities
+    """
+    # Save the results in:
     q_entities, a_entities = [], []
 
-    # # Using 'dbpedia_spotlight':
-    # q_entities = [ent._.dbpedia_raw_result for ent in q_doc.ents]
-    # a_entities = [ent._.dbpedia_raw_result for ent in a_doc.ents]
+    # To identifying the nouns in the question
+    q_doc = NLP(question)
 
-    # Tag question entities:
+    # =======================  Tag question entities:  =======================
     for chunk in q_doc.noun_chunks:
+
+        # Filter unwanted nons (Not entities):
         if chunk.text in STOP_WORDS or chunk.text.startswith("how") or chunk.text.startswith("what"):
             continue
+
+        # Build the sentence that will be inference:
         inf_sent = str(question[:chunk.start_char]) + START_TOKEN + " " + \
                    str(question[chunk.start_char:chunk.end_char]) + " " + END_TOKEN \
                    + str(question[chunk.end_char:])
 
+        # inference model
         outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2,
                                  num_return_sequences=1)
         entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-        if not entity:
+
+        if not entity:  # didn't found a entity
             continue
+
+        # For the detected entity extract it's wikidata ID:
         tmp = entity[0].split(" >> ")
         if len(tmp) == 2 and tmp[0] != "":
             entity_name, entity_lang = tmp
@@ -61,18 +76,19 @@ def link_qa_pair(question, answer, model, tokenizer):
                 item = pywikibot.ItemPage.fromPage(page)
                 entity_id = item.id
                 q_entities.append((entity_name, entity_id))
-                # print(f"\n ========== text: {chunk.text} , entity: {entity_name}\n")
             except pywikibot.exceptions.NoPageError:
-                # print(f"\nPage {entity_name} not found ")
                 pass
             except pywikibot.exceptions.InvalidTitleError:
                 pass
 
-    # Tag answer entities:
-    inf_sent = START_TOKEN + " " + str(answer) + " " + END_TOKEN
+    # ======================= Tag answer entities: =======================
+    inf_sent = START_TOKEN + " " + str(answer) + " " + END_TOKEN  # Build the sentence that will be inference:
+
+    # inference model
     outputs = model.generate(**tokenizer(inf_sent, return_tensors="pt").to(DEVICE), num_beams=2, num_return_sequences=1)
     entity = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    if entity:
+
+    if entity:  # if detected a entity in answer --> extract it's wikidata ID:
         tmp = entity[0].split(" >> ")
         if len(tmp) == 2 and tmp[0] != "":
             entity_name, entity_lang = entity[0].split(" >> ")
@@ -81,10 +97,7 @@ def link_qa_pair(question, answer, model, tokenizer):
                 item = pywikibot.ItemPage.fromPage(page)
                 entity_id = item.id
                 a_entities.append((entity_name, entity_id))
-                # print(f"\n ========== text: {answer} , entity: {item.aliases._data['en'][0]}")
-                # print(f"\n ========== text: {answer} , entity: {entity_name}")
             except pywikibot.exceptions.NoPageError:
-                # print(f"\nPage {entity_name} not found ")
                 pass
             except pywikibot.exceptions.InvalidTitleError:
                 pass
@@ -94,20 +107,35 @@ def link_qa_pair(question, answer, model, tokenizer):
 
 
 def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, output_path=OUTPUT_PATH):
-    df = pd.read_csv(input_path)
-    data = df[["Question", "Answer", "Id", "Language", "Dataset"]].to_numpy()
-    flag = True  # Start from the QA when the bug stops
+    """
+    This function link all the finetuning datasets QA-pairs with there wikidata entity code.
+    :param model: facebook mGENRE model
+    :param tokenizer: facebook mGENRE tokenizer
+    :param input_path: the finetunning dataset path
+    :param output_path: the output path to save the results as a json file
+    """
+    final_result = pd.read_csv(input_path)
+    data = final_result[["Question", "Answer", "Id", "Language", "Dataset"]].to_numpy()
+
+    flag = False  # Flag to limit the range of the tagging --> Set True
     with open(output_path, 'w') as outfile:
         with jsonlines.Writer(outfile) as writer:
             for i in tqdm(range(data.shape[0])):
-                if str(data[i][2]) == "1174897936116285345":  # From:
-                    flag = False
-                elif str(data[i][2]) == "4529749965014481176":  # End:
-                    flag = True
+
+                # Code for tag only for a start question id and ending in a given end id:
+                # if str(data[i][2]) == "1174897936116285345":  # From:
+                #     flag = False
+                # elif str(data[i][2]) == "4529749965014481176":  # End:
+                #     flag = True
+
+                # Only tag english QA and not from Mintaka that is already tagged:
                 if flag or data[i][3] != "en" or data[i][4] == "Mintaka":
                     continue
-                qa_entities = link_qa_pair(data[i][0], data[i][1], model, tokenizer)
-                qa_entities["Id"] = data[i][2]
+
+                qa_entities = link_qa_pair(data[i][0], data[i][1], model, tokenizer)  # Tag the current QA-pair
+                qa_entities["Id"] = data[i][2]  # Add it's Id
+
+                # Write to json file:
                 writer.write(qa_entities)
 
 
@@ -115,64 +143,3 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
     model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval().to(DEVICE)
     link_finetuning_dataset(model, tokenizer)
-    # tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki")
-    # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki").eval()
-    # link_finetuning_dataset(model, tokenizer)
-
-
-# =======================================  mGenre with HG ====================================================
-
-# from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
-# tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
-# model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval().to(DEVICE)
-
-# sentences = []
-# sentences.append("[START] Einstein [END] era un fisico tedesco.")
-# sentences.append("[START] Einstein [END] was a German physicist.")
-# sentences.append("how long did it take the [START] twin towers [END] to be built?")
-# sentences.append("who sings love you like there's no tomorrow? [START] Chris Young [END]")
-
-# Italian for
-
-# outputs = model.generate(
-#     **tokenizer(sentences, return_tensors="pt"),
-#     num_beams=2,
-#     num_return_sequences=1,
-#     # OPTIONAL: use constrained beam search
-#     # prefix_allowed_tokens_fn=lambda batch_id, sent: trie.get(sent.tolist()),
-# )
-
-# res = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-# print(res)
-
-# =======================================  mGenre not with HG ====================================================
-
-
-# import pickle
-#
-# from EntityLinking.genre.genre.fairseq_model import mGENRE
-# from EntityLinking.genre.genre.trie import MarisaTrie, Trie
-#
-# with open("../data/lang_title2wikidataID-normalized_with_redirect.pkl", "rb") as f:
-#     lang_title2wikidataID = pickle.load(f)
-#
-# # memory efficient prefix tree (trie) implemented with `marisa_trie`
-# with open("../data/titles_lang_all105_marisa_trie_with_redirect.pkl", "rb") as f:
-#     trie = pickle.load(f)
-#
-# # generate Wikipedia titles and language IDs
-# model = mGENRE.from_pretrained("../models/fairseq_multilingual_entity_disambiguation").eval()
-#
-# model.sample(
-#     sentences=["[START] Einstein [END] era un fisico tedesco."],
-#     # Italian for "[START] Einstein [END] was a German physicist."
-#     prefix_allowed_tokens_fn=lambda batch_id, sent: [
-#         e for e in trie.get(sent.tolist()) if e < len(model.task.target_dictionary)
-#     ],
-#     text_to_id=lambda x: max(lang_title2wikidataID[
-#         tuple(reversed(x.split(" >> ")))
-#     ], key=lambda y: int(y[1:])),
-#     marginalize=True,
-# )
-
