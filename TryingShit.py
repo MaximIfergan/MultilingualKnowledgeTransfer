@@ -12,6 +12,7 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
+print_title("Function To delete")
 
 # print_title("Load models:")
 
@@ -120,8 +121,8 @@ def print_title(title):
 #
 # hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
 
-df = pd.read_csv("entities_stats_final.csv")
-df = df[df["source"] == "PopQA"]
-print(df["daily_views"].corr(df["c4"]))
+# df = pd.read_csv("entities_stats_final.csv")
+# df = df[df["source"] == "PopQA"]
+# print(df["daily_views"].corr(df["c4"]))
 # df.hist(bins=3)
 # plt.show()

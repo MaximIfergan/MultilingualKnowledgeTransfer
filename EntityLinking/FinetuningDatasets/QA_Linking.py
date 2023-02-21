@@ -140,6 +140,7 @@ def link_finetuning_dataset(model, tokenizer, input_path=FINETUNING_DATA_PATH, o
 
 
 def main():
+    """ Generate all the entity linking """
     tokenizer = AutoTokenizer.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR)
     model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mgenre-wiki", cache_dir=CACHE_DIR).eval().to(DEVICE)
     link_finetuning_dataset(model, tokenizer)
