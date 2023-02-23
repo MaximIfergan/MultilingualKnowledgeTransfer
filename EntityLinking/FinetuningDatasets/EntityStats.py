@@ -277,7 +277,12 @@ def create_df_for_stats():
 
 
 def main():
-    df = create_df_for_stats()
+    training_entities = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
+    # df = pd.read_csv("entities_stats_final.csv")
+    # df = df[df["source"] == "PopQA"]
+    # print(df["daily_views"].corr(df["c4"]))
+    # df.hist(bins=3)
+    # plt.show()
 
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
@@ -313,7 +318,8 @@ def main():
 
 # ==============================      Function To delete      ==============================
 
-def seperate_dataset_entities_linking():
+
+def separate_dataset_entities_linking():
     df = pd.read_csv("Data/Datasets/PreprocessDataset.csv")
     NQentitiesPath = "NQ_Linked_Entities.json"
     MKQAentitiesPath = "MKQA_Linked_Entities.json"
