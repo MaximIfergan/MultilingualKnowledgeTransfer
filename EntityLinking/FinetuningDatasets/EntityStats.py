@@ -12,8 +12,7 @@ import matplotlib.pyplot as plt
 
 # ===============================      Global Variables:      ===============================
 
-# WIKI_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/wikipedia_entity_map.npz"
-WIKI_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/roots_entity_map.npz"
+WIKI_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/wikipedia_entity_map.npz"
 ROOTS_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/roots_entity_map.npz"
 C4_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/c4_entity_map.npz"
 MKQA_TAG_ENTITIES_PATH = "Data/Datasets/MKQA/MKQA_Linked_Entities.json"
@@ -245,8 +244,8 @@ def add_PopQA_entities(df, training_entities, num_of_entities=float('inf')):
 
 def add_pretraining_dataset_appearance(df):
     """ this functions add the pretraining dataset entities appearance to the given dataframe """
-    c4 = np.load(C4_PATH)
-    roots = np.load(ROOTS_PATH)
+    c4 = np.load(C4_PATH, allow_pickle=True)
+    roots = np.load(ROOTS_PATH, allow_pickle=True)
     df["c4"] = -1
     df["roots"] = -1
     for index, row in tqdm(df.iterrows()):
@@ -283,7 +282,7 @@ def add_entities_from_query(df, training_entities, file_path, num_of_entities=fl
 
 def create_df_for_stats():
     """ this function builds the entities dataframe for stats analysis """
-    training_entities = np.load(WIKI_PATH)
+    training_entities = np.load(WIKI_PATH, allow_pickle=True)
     # training_entities = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
     df = pd.DataFrame({"name": [], "source": [],
                        "qa_id": [], "daily_views": [],
