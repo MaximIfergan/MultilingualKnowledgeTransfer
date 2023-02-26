@@ -2,7 +2,7 @@
 # import pandas as pd
 import EntityLinking.FinetuningDatasets.QA_Linking as QA_Linking
 import EntityLinking.FinetuningDatasets.EntityStats as EntityStats
-
+from huggingface_hub import hf_hub_download
 
 def main():
     # QA_Linking.main()
@@ -11,3 +11,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")

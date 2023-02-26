@@ -1,0 +1,79 @@
+============= Cities =============
+
+SELECT ?item ?itemLabel 
+WHERE 
+{
+  ?item wdt:P31 wd:Q515.
+  ?item wdt:P1082 ?population .
+  FILTER(?population>1000000) .
+  ?item rdfs:label ?itemLabel .
+  FILTER(LANG(?itemLabel) = "en") .
+  FILTER(!CONTAINS(?itemLabel, ' ')) .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+} group by ?item ?itemLabel
+
+
+============= Countries =============
+
+SELECT ?item ?itemLabel 
+WHERE 
+{
+  ?item wdt:P31 wd:Q6256.
+  ?item rdfs:label ?itemLabel .
+  FILTER(LANG(?itemLabel) = "en") .
+  FILTER(!CONTAINS(?itemLabel, ' ')) .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+} group by ?item ?itemLabel
+
+
+============= Companies =============
+
+
+SELECT ?item ?itemLabel 
+WHERE 
+{
+  ?item wdt:P31 wd:Q891723.
+  ?item wdt:P17 wd:Q30 .
+  ?item rdfs:label ?itemLabel .
+  FILTER(LANG(?itemLabel) = "en") .
+  FILTER(!CONTAINS(?itemLabel, ' ')) .
+  FILTER(!CONTAINS(?itemLabel, '-')) .
+  FILTER(!CONTAINS(?itemLabel, '.')) .
+  FILTER(!CONTAINS(?itemLabel, '1')) .
+  FILTER(!CONTAINS(?itemLabel, '2')) .
+  FILTER(!CONTAINS(?itemLabel, '3')) .
+  FILTER(!CONTAINS(?itemLabel, '4')) .
+  FILTER(!CONTAINS(?itemLabel, '5')) .
+  FILTER(!CONTAINS(?itemLabel, '6')) .
+  FILTER(!CONTAINS(?itemLabel, '7')) .
+  FILTER(!CONTAINS(?itemLabel, '8')) .
+  FILTER(!CONTAINS(?itemLabel, '9')) .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+} group by ?item ?itemLabel
+  LIMIT 200
+
+
+============= Religion =============
+
+
+SELECT ?item ?itemLabel 
+WHERE 
+{
+  ?item wdt:P31 wd:Q9174.
+  ?item rdfs:label ?itemLabel .
+  FILTER(LANG(?itemLabel) = "en") .
+  FILTER(!CONTAINS(?itemLabel, ' ')) .
+  FILTER(!CONTAINS(?itemLabel, '-')) .
+  FILTER(!CONTAINS(?itemLabel, '.')) .
+  FILTER(!CONTAINS(?itemLabel, '1')) .
+  FILTER(!CONTAINS(?itemLabel, '2')) .
+  FILTER(!CONTAINS(?itemLabel, '3')) .
+  FILTER(!CONTAINS(?itemLabel, '4')) .
+  FILTER(!CONTAINS(?itemLabel, '5')) .
+  FILTER(!CONTAINS(?itemLabel, '6')) .
+  FILTER(!CONTAINS(?itemLabel, '7')) .
+  FILTER(!CONTAINS(?itemLabel, '8')) .
+  FILTER(!CONTAINS(?itemLabel, '9')) .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+} group by ?item ?itemLabel
+  LIMIT 200

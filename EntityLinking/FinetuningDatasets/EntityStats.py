@@ -8,6 +8,7 @@ import pywikibot
 from tqdm.auto import tqdm
 import numpy as np
 import json
+import matplotlib.pyplot as plt
 
 # ===============================      Global Variables:      ===============================
 
@@ -260,29 +261,54 @@ def add_pretraining_dataset_appearance(df):
     return df
 
 
+def add_entities_from_query(df, training_entities, file_path, num_of_entities=float('inf')):
+    count = 0
+    new_entities_df = pd.read_csv(file_path)
+    source = file_path.split("/")[-1]
+    for index, row in new_entities_df.iterrows():
+        if count > num_of_entities:
+            break
+        entity_id = row["item"].split("/")[-1]
+        entity_name = row["itemLabel"]
+        key, num_of_appearance_in_pretraining = get_number_of_appearance_in_pretraining(training_entities, entity_name)
+        if num_of_appearance_in_pretraining is None:
+            continue
+        entity_daily_views = get_daily_average_page_view(entity_id, 'en')
+        df.loc[entity_id] = [entity_name, source, index, entity_daily_views,
+                             num_of_appearance_in_pretraining, 'en', key]
+        count += 1
+    return df
+
+
 def create_df_for_stats():
     """ this function builds the entities dataframe for stats analysis """
-    # training_entities = np.load(WIKI_PATH)
-    training_entities = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
+    training_entities = np.load(WIKI_PATH)
+    # training_entities = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
     df = pd.DataFrame({"name": [], "source": [],
                        "qa_id": [], "daily_views": [],
                        "wikipedia": [], "lang": [],
                        "dbpedia_uri": []})
-    df = add_MKQA_entities(df, training_entities, num_of_entities=5)
-    df = add_NQ_entities(df, training_entities, num_of_entities=5)
-    df = add_Mintaka_entities(df, training_entities, num_of_entities=5)
-    df = add_PopQA_entities(df, training_entities, num_of_entities=5)
-    # df = add_pretraining_dataset_appearance(df)
+    df = add_MKQA_entities(df, training_entities, num_of_entities=1)
+    df = add_NQ_entities(df, training_entities, num_of_entities=1)
+    df = add_Mintaka_entities(df, training_entities, num_of_entities=1)
+    df = add_PopQA_entities(df, training_entities, num_of_entities=1)
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_cities.csv", num_of_entities=1)
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_companies.csv", num_of_entities=1)
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_countries.csv", num_of_entities=1)
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_religions.csv", num_of_entities=1)
+    df = add_pretraining_dataset_appearance(df)
     return df
 
 
 def main():
-    training_entities = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
-    # df = pd.read_csv("entities_stats_final.csv")
-    # df = df[df["source"] == "PopQA"]
+    df = create_df_for_stats()
+    df.to_csv("EntityLinking/FinetuningDatasets/results_for_stats.csv")
     # print(df["daily_views"].corr(df["c4"]))
-    # df.hist(bins=3)
-    # plt.show()
+    # df = df[~df["name"].str.contains(" ")]
+    # df = df.loc[:, ~df.columns.str.contains('^Unnamed: 0.1')]
+    # df = pd.read_csv("EntityLinking/FinetuningDatasets/EntitiesStatsFiles/entities_stats_final.csv", index_col="Unnamed: 0")
+
+
 
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
