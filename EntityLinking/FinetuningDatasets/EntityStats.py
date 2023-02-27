@@ -288,14 +288,14 @@ def create_df_for_stats():
                        "qa_id": [], "daily_views": [],
                        "wikipedia": [], "lang": [],
                        "dbpedia_uri": []})
-    df = add_MKQA_entities(df, training_entities, num_of_entities=1)
-    df = add_NQ_entities(df, training_entities, num_of_entities=1)
-    df = add_Mintaka_entities(df, training_entities, num_of_entities=1)
-    df = add_PopQA_entities(df, training_entities, num_of_entities=1)
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_cities.csv", num_of_entities=1)
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_companies.csv", num_of_entities=1)
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_countries.csv", num_of_entities=1)
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_religions.csv", num_of_entities=1)
+    df = add_MKQA_entities(df, training_entities, num_of_entities=300)
+    df = add_NQ_entities(df, training_entities, num_of_entities=300)
+    df = add_Mintaka_entities(df, training_entities, num_of_entities=300)
+    df = add_PopQA_entities(df, training_entities, num_of_entities=500)
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_cities.csv")
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_companies.csv")
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_countries.csv")
+    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_religions.csv")
     df = add_pretraining_dataset_appearance(df)
     return df
 
