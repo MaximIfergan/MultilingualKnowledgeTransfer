@@ -244,8 +244,8 @@ def add_PopQA_entities(df, training_entities, num_of_entities=float('inf')):
 
 def add_pretraining_dataset_appearance(df):
     """ this functions add the pretraining dataset entities appearance to the given dataframe """
-    c4 = np.load(C4_PATH, allow_pickle=True)
-    roots = np.load(ROOTS_PATH, allow_pickle=True)
+    c4 = np.load(C4_PATH)
+    roots = np.load(ROOTS_PATH)
     df["c4"] = -1
     df["roots"] = -1
     for index, row in tqdm(df.iterrows()):
@@ -282,7 +282,7 @@ def add_entities_from_query(df, training_entities, file_path, num_of_entities=fl
 
 def create_df_for_stats():
     """ this function builds the entities dataframe for stats analysis """
-    training_entities = np.load(WIKI_PATH, allow_pickle=True)
+    training_entities = np.load(WIKI_PATH)
     # training_entities = np.load("EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz")
     df = pd.DataFrame({"name": [], "source": [],
                        "qa_id": [], "daily_views": [],
