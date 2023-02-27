@@ -13,5 +13,6 @@ def print_title(title):
 
 # print_title("Load models:")
 
-WIKI_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/PretrainingDatasets/datasets--nkandpa2--pretraining_entities/snapshots/550b4b11a5ac147bf261ff150a65b98b01469b3f/wikipedia_entity_map.npz"
+WIKI_PATH = "EntityLinking/PretrainingDatasets/wikipedia_entity_map.npz"
 training_entities = np.load(WIKI_PATH)
+
