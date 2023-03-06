@@ -57,7 +57,10 @@ def get_daily_average_page_view(entity_id, lang):
     req = api.Request(site=site, parameters={'action': 'query',
                                              'titles': page.title(),
                                              'prop': 'pageviews'})
-    page_view_stats = req.submit()['query']['pages'][str(page.pageid)]['pageviews']
+    try:
+        page_view_stats = req.submit()['query']['pages'][str(page.pageid)]['pageviews']
+    except KeyError:
+        return -1
     total_views = 0
     number_of_days = 0
     for key in page_view_stats:
@@ -300,15 +303,39 @@ def create_df_for_stats():
     return df
 
 
+def plot_corr_group_by_source(dataset="c4"):
+    corr = []
+    df = pd.read_csv("EntityLinking/FinetuningDatasets/results_for_stats.csv")
+    sources = list(df["source"].unique())
+    for source in sources:
+        corr.append(df[df["source"] == source]["daily_views"].corr(df[dataset]))
+    for i in range(len(sources)):
+        if sources[i].startswith("query"):
+            sources[i] = sources[i][6:-4]
+    sources.append("All")
+    corr.append(df["daily_views"].corr(df[dataset]))
+    plt.title(f"Correlation Between page views and {dataset}")
+    plt.bar(sources, corr)
+    plt.xticks(rotation=45, size="small")
+    plt.xlabel("Entities sources")
+    plt.ylabel("corr")
+    for i in range(len(sources)):
+        plt.text(i, round(corr[i], 2), round(corr[i], 2), ha='center')
+    plt.show()
+
+
 def main():
-    df = create_df_for_stats()
-    df.to_csv("EntityLinking/FinetuningDatasets/results_for_stats.csv")
-    # print(df["daily_views"].corr(df["c4"]))
+    plot_corr_group_by_source("roots")
+    # df = create_df_for_stats()
+    # df.to_csv("EntityLinking/FinetuningDatasets/results_for_stats.csv")
+    # values = ["query_cities.csv", "query_companies.csv", "query_countries.csv", "query_religions.csv",
+    #           "MKQA", "NQ", "Mintaka", "PopQA"]
+    # df = df.loc[df['source'].isin(values)]
+    # df['source'].hist()
+    # plt.show()
     # df = df[~df["name"].str.contains(" ")]
     # df = df.loc[:, ~df.columns.str.contains('^Unnamed: 0.1')]
-    # df = pd.read_csv("EntityLinking/FinetuningDatasets/EntitiesStatsFiles/entities_stats_final.csv", index_col="Unnamed: 0")
-
-
+    # print(get_daily_average_page_view("Q7049549", "en"))
 
 
 # # =============== Check for number of page views in wikipedia with page view: ======================

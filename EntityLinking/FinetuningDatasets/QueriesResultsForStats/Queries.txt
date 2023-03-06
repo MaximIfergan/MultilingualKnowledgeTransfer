@@ -79,4 +79,18 @@ WHERE
   LIMIT 200
   
   
-  
+============= Hebrew poets =============
+
+
+SELECT ?item ?itemLabel ?item_he ?birthYear 
+WHERE 
+{
+  ?item wdt:P106 wd:Q49757.  # occupation - Poet
+  ?item wdt:P106 wd:Q36180.  # occupation - Writer
+  ?item wdt:P1412 wd:Q9288.  # languages spoken, written or signed - Hebrew
+  ?item wdt:P569 ?birthDate.  # Save birth date
+  BIND(YEAR(?birthDate) as ?birthYear). # Save birth year
+  ?item rdfs:label ?item_he filter (lang(?item_he) = "he")
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+} 
+LIMIT 100
