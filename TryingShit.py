@@ -28,3 +28,5 @@ clm_dict = item_dict["claims"]   # Statements:
 clm_list = clm_dict["P361"]   # Part-of:
 for clm in clm_list:  # Print entities that are part of
     print("Q" + str(clm.toJSON()["mainsnak"]["datavalue"]["value"]["numeric-id"]))
+
+# Try
