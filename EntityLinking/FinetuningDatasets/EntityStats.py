@@ -72,6 +72,8 @@ def get_daily_average_page_view(entity_id, lang):
             continue
         total_views += page_view_stats[key]
         number_of_days += 1
+    if number_of_days == 0:
+        return -1, -1
     return int(total_views / number_of_days), page_name
 
 
