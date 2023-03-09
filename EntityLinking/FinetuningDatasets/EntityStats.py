@@ -9,6 +9,7 @@ from tqdm.auto import tqdm
 import numpy as np
 import json
 import matplotlib.pyplot as plt
+import Data.DataPreprocessing as DataPreprocessing
 
 # ===============================      Global Variables:      ===============================
 
@@ -21,7 +22,6 @@ MINTAKA_TRAIN_DATASET_PATH = "Data/Datasets/Mintaka/mintaka_train.json"
 POPQA_DATASET_PATH = "Data/Datasets/POPQA/popQA.tsv"
 CLIENT = Client()
 
-
 # ===============================      Global Functions:      ===============================
 
 
@@ -30,8 +30,10 @@ def get_entity_name(entity_id, lang):
     :return: The entity name as a string for a given entity id and language code
     """
     entity = CLIENT.get(entity_id, load=True)
-    page_name = entity.data['labels'][lang]['value']
-    return page_name
+    if lang in entity.data['labels']:
+        return entity.data['labels'][lang]['value']
+    else:
+        return -1
 
 
 def get_entity_id(entity_name, lang):
@@ -52,6 +54,8 @@ def get_daily_average_page_view(entity_id, lang):
     """ this function for a given entity id and language returns the number of the average daily views of it's
         wikipedia page in the given language """
     page_name = get_entity_name(entity_id, lang)
+    if page_name == -1:
+        return -1, -1
     site = pywikibot.Site(lang, "wikipedia")
     page = pywikibot.Page(site, page_name)
     req = api.Request(site=site, parameters={'action': 'query',
@@ -60,7 +64,7 @@ def get_daily_average_page_view(entity_id, lang):
     try:
         page_view_stats = req.submit()['query']['pages'][str(page.pageid)]['pageviews']
     except KeyError:
-        return -1
+        return -1, -1
     total_views = 0
     number_of_days = 0
     for key in page_view_stats:
@@ -68,7 +72,7 @@ def get_daily_average_page_view(entity_id, lang):
             continue
         total_views += page_view_stats[key]
         number_of_days += 1
-    return int(total_views / number_of_days)
+    return int(total_views / number_of_days), page_name
 
 
 def get_number_of_appearance_in_pretraining(training_entities, entity_name, type="name"):
@@ -124,7 +128,7 @@ def add_MKQA_entities(df, training_entities, num_of_entities=float('inf'), mkqa_
                                                                                             entity_name)
             if num_of_appearance_in_pretraining is None:
                 continue
-            entity_daily_views = get_daily_average_page_view(entity_id, 'en')
+            entity_daily_views, _ = get_daily_average_page_view(entity_id, 'en')
             qa_id = qa["Id"]
             df.loc[entity_id] = [entity_name, "MKQA", qa_id, entity_daily_views,
                                  num_of_appearance_in_pretraining, 'en', key]
@@ -160,7 +164,7 @@ def add_NQ_entities(df, training_entities, num_of_entities=float('inf'), nq_enti
                                                                                             entity_name)
             if num_of_appearance_in_pretraining is None:
                 continue
-            entity_daily_views = get_daily_average_page_view(entity_id, 'en')
+            entity_daily_views, _ = get_daily_average_page_view(entity_id, 'en')
             qa_id = qa["Id"]
             df.loc[entity_id] = [entity_name, "NQ", qa_id, entity_daily_views,
                                  num_of_appearance_in_pretraining, 'en', key]
@@ -202,7 +206,7 @@ def add_Mintaka_entities(df, training_entities, num_of_entities=float('inf')):
                 if num_of_appearance_in_pretraining is None:
                     continue
                 entity_name = entity["label"]
-                entity_daily_views = get_daily_average_page_view(entity_id, 'en')
+                entity_daily_views, _ = get_daily_average_page_view(entity_id, 'en')
                 qa_id = qa["id"]
                 df.loc[entity_id] = [entity_name, "Mintaka", qa_id, entity_daily_views,
                                      num_of_appearance_in_pretraining, 'en', key]
@@ -237,7 +241,7 @@ def add_PopQA_entities(df, training_entities, num_of_entities=float('inf')):
                                                                                         type="id")
         if num_of_appearance_in_pretraining is None:
             continue
-        entity_daily_views = get_daily_average_page_view(entity_id, 'en')
+        entity_daily_views, _ = get_daily_average_page_view(entity_id, 'en')
         qa_id = row["id"]
         df.loc[entity_id] = [entity_name, "PopQA", qa_id, entity_daily_views,
                              num_of_appearance_in_pretraining, 'en', key]
@@ -276,7 +280,7 @@ def add_entities_from_query(df, training_entities, file_path, num_of_entities=fl
         key, num_of_appearance_in_pretraining = get_number_of_appearance_in_pretraining(training_entities, entity_name)
         if num_of_appearance_in_pretraining is None:
             continue
-        entity_daily_views = get_daily_average_page_view(entity_id, 'en')
+        entity_daily_views, _ = get_daily_average_page_view(entity_id, 'en')
         df.loc[entity_id] = [entity_name, source, index, entity_daily_views,
                              num_of_appearance_in_pretraining, 'en', key]
         count += 1
@@ -324,8 +328,42 @@ def plot_corr_group_by_source(dataset="c4"):
     plt.show()
 
 
+def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
+    data = pd.read_csv(path, sep='\t')
+    cash_memory = dict()
+    for lang in DataPreprocessing.FINETUNING_LANGS:
+        data[f"{lang}_s_pv"] = -1
+        data[f"{lang}_o_pv"] = -1
+        data[f"{lang}_s_label"] = -1
+        data[f"{lang}_o_label"] = -1
+        cash_memory[lang] = dict()
+    # count = 0
+    for index, row in data.iterrows():
+        # if count >= 20:
+        #     break
+        for lang in DataPreprocessing.FINETUNING_LANGS:
+            s_id = row["s_uri"].split("/")[-1]
+            o_id = row["o_uri"].split("/")[-1]
+            if s_id in cash_memory[lang]:
+                s_pv, s_label = cash_memory[s_id]
+            else:
+                s_pv, s_label = get_daily_average_page_view(s_id, lang)
+                cash_memory[lang][s_id] = (s_pv, s_label)
+            if o_id in cash_memory[lang]:
+                o_pv, o_label = cash_memory[lang][o_id]
+            else:
+                o_pv, o_label = get_daily_average_page_view(o_id, lang)
+                cash_memory[lang][o_id] = (o_pv, o_label)
+            data.at[index, f"{lang}_s_pv"] = s_pv
+            data.at[index, f"{lang}_o_pv"] = o_pv
+            data.at[index, f"{lang}_s_label"] = s_label
+            data.at[index, f"{lang}_o_label"] = o_label
+        count += 1
+    data.to_csv("try.csv")
+
+
 def main():
-    plot_corr_group_by_source("roots")
+    # plot_corr_group_by_source("roots")
     # df = create_df_for_stats()
     # df.to_csv("EntityLinking/FinetuningDatasets/results_for_stats.csv")
     # values = ["query_cities.csv", "query_companies.csv", "query_countries.csv", "query_religions.csv",
@@ -336,7 +374,7 @@ def main():
     # df = df[~df["name"].str.contains(" ")]
     # df = df.loc[:, ~df.columns.str.contains('^Unnamed: 0.1')]
     # print(get_daily_average_page_view("Q7049549", "en"))
-
+    add_to_PopQA_page_views()
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
