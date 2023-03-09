@@ -358,7 +358,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
             data.at[index, f"{lang}_o_pv"] = o_pv
             data.at[index, f"{lang}_s_label"] = s_label
             data.at[index, f"{lang}_o_label"] = o_label
-        count += 1
+        # count += 1
     data.to_csv("try.csv")
 
 
