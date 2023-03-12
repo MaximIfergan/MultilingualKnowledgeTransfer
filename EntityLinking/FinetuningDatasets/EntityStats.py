@@ -331,7 +331,8 @@ def plot_corr_group_by_source(dataset="c4"):
 
 
 def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
-    data = pd.read_csv(path, sep='\t')
+    # data = pd.read_csv(path, sep='\t')
+    data = pd.read_csv(path)
     cash_memory = dict()
     for lang in DataPreprocessing.FINETUNING_LANGS:
         # data[f"{lang}_s_pv"] = -1
