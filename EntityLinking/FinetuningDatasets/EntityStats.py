@@ -339,10 +339,11 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
         data[f"{lang}_s_label"] = -1
         data[f"{lang}_o_label"] = -1
         cash_memory[lang] = dict()
-    # count = 0
+    count = 0
     for index, row in data.iterrows():
-        # if count >= 20:
-        #     break
+        if count % 500 == 0:
+            data.to_csv("backup.csv")
+            print(f"{count} saved")
         for lang in DataPreprocessing.FINETUNING_LANGS:
             s_id = row["s_uri"].split("/")[-1]
             o_id = row["o_uri"].split("/")[-1]
@@ -360,9 +361,8 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
             data.at[index, f"{lang}_o_pv"] = o_pv
             data.at[index, f"{lang}_s_label"] = s_label
             data.at[index, f"{lang}_o_label"] = o_label
-        # count += 1
-    data.to_csv("try.csv")
-
+        count += 1
+    data.to_csv("PopQA_pv_stats.csv")
 
 def main():
     # plot_corr_group_by_source("roots")
