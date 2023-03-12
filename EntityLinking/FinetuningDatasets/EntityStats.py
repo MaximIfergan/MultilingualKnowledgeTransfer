@@ -331,21 +331,21 @@ def plot_corr_group_by_source(dataset="c4"):
 
 
 def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
-    # data = pd.read_csv(path, sep='\t')
-    data = pd.read_csv(path)
+    data = pd.read_csv(path, sep='\t')
+    # data = pd.read_csv(path)
     cash_memory = dict()
     for lang in DataPreprocessing.FINETUNING_LANGS:
-        # data[f"{lang}_s_pv"] = -1
-        # data[f"{lang}_o_pv"] = -1
-        # data[f"{lang}_s_label"] = -1
-        # data[f"{lang}_o_label"] = -1
+        data[f"{lang}_s_pv"] = -1
+        data[f"{lang}_o_pv"] = -1
+        data[f"{lang}_s_label"] = -1
+        data[f"{lang}_o_label"] = -1
         cash_memory[lang] = dict()
     count = 0
     for index, row in data.iterrows():
-        if count <= 499:
-            count += 1
-            continue
-        if count % 500 == 0:
+        # if count <= 499:
+        #     count += 1
+        #     continue
+        if count % 100 == 0:
             data.to_csv("backup.csv")
             print(f"{count} saved")
         for lang in DataPreprocessing.FINETUNING_LANGS:
@@ -381,7 +381,7 @@ def main():
     # df = df[~df["name"].str.contains(" ")]
     # df = df.loc[:, ~df.columns.str.contains('^Unnamed: 0.1')]
     # print(get_daily_average_page_view("Q7049549", "en"))
-    add_to_PopQA_page_views(path="backup.csv")
+    add_to_PopQA_page_views()
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
