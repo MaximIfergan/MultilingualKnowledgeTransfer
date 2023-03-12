@@ -58,12 +58,12 @@ def get_daily_average_page_view(entity_id, lang):
         return -1, -1
     site = pywikibot.Site(lang, "wikipedia")
     page = pywikibot.Page(site, page_name)
-    req = api.Request(site=site, parameters={'action': 'query',
-                                             'titles': page.title(),
-                                             'prop': 'pageviews'})
     try:
+        req = api.Request(site=site, parameters={'action': 'query',
+                                                 'titles': page.title(),
+                                                 'prop': 'pageviews'})
         page_view_stats = req.submit()['query']['pages'][str(page.pageid)]['pageviews']
-    except KeyError:
+    except (KeyError, pywikibot.exceptions.InvalidTitleError) as e:
         return -1, -1
     total_views = 0
     number_of_days = 0
