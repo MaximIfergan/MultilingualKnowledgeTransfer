@@ -3,6 +3,12 @@ import pandas as pd
 import EntityLinking.FinetuningDatasets.EntityStats as EntityStats
 
 
+class TransferStats:
+
+    def __init__(self):
+        pass
+
+
 def main():
     count = 0
     df = pd.read_csv("LingualTransfer/Data/query_hebrew_poets_birth_year.csv")
