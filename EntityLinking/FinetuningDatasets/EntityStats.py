@@ -331,20 +331,21 @@ def plot_corr_group_by_source(dataset="c4"):
 
 
 def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
-    data = pd.read_csv(path, sep='\t')
-    # data = pd.read_csv(path)
+    # data = pd.read_csv(path, sep='\t')
+    data = pd.read_csv(path)
+
     cash_memory = dict()
     for lang in DataPreprocessing.FINETUNING_LANGS:
-        data[f"{lang}_s_pv"] = -1
-        data[f"{lang}_o_pv"] = -1
-        data[f"{lang}_s_label"] = -1
-        data[f"{lang}_o_label"] = -1
+        # data[f"{lang}_s_pv"] = -1
+        # data[f"{lang}_o_pv"] = -1
+        # data[f"{lang}_s_label"] = -1
+        # data[f"{lang}_o_label"] = -1
         cash_memory[lang] = dict()
     count = 0
     for index, row in data.iterrows():
-        # if count <= 499:
-        #     count += 1
-        #     continue
+        if count <= 699:
+            count += 1
+            continue
         if count % 100 == 0:
             data.to_csv("backup.csv")
             print(f"{count} saved")
@@ -352,7 +353,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
             s_id = row["s_uri"].split("/")[-1]
             o_id = row["o_uri"].split("/")[-1]
             if s_id in cash_memory[lang]:
-                s_pv, s_label = cash_memory[s_id]
+                s_pv, s_label = cash_memory[lang][s_id]
             else:
                 s_pv, s_label = get_daily_average_page_view(s_id, lang)
                 cash_memory[lang][s_id] = (s_pv, s_label)
