@@ -343,7 +343,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
         cash_memory[lang] = dict()
     count = 0
     for index, row in data.iterrows():
-        if count <= 699:
+        if count <= 2099:
             count += 1
             continue
         if count % 100 == 0:
