@@ -416,7 +416,7 @@ def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_pat
             entity_id = entity[1]
             wikidata_entity = CLIENT.get(entity_id, load=True)
             for lang in DataPreprocessing.FINETUNING_LANGS:
-                if count % 5 == 0:
+                if count % 10000 == 0:
                     with open(output_path, "wb") as fp:
                         pickle.dump(result_dict, fp)
                         print(f"Backup {count}")
