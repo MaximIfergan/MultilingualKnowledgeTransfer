@@ -5,7 +5,7 @@
 #SBATCH --mem=100000  # memory in Mb
 #SBATCH -o JobsOutput/Job_STDOUT_%j  # send stdout to outfile
 #SBATCH -e JobsOutput/Job_STDERR_%j  # send stderr to errfile
-#SBATCH -t 0-15:00:00  # time requested in hour:minute:second
+#SBATCH -t 1-23:30:00  # time requested in hour:minute:second
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 #SBATCH --mail-user=maxim.ifergan@mail.huji.ac.il
 #SBATCH --gres=gpu:1,vmem:6g
