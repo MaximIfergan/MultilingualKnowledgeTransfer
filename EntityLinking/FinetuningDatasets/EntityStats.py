@@ -10,6 +10,7 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import Data.DataPreprocessing as DataPreprocessing
+import sys
 
 # ===============================      Global Variables:      ===============================
 
@@ -29,7 +30,11 @@ def get_entity_name(entity_id, lang):
     """
     :return: The entity name as a string for a given entity id and language code
     """
-    entity = CLIENT.get(entity_id, load=True)
+    try:
+        entity = CLIENT.get(entity_id, load=True)
+    except Exception as e:
+        sys.stderr.write("\n Error:" + str(e) + "\n")
+        return -1
     if lang in entity.data['labels']:
         return entity.data['labels'][lang]['value']
     else:
@@ -343,7 +348,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
         cash_memory[lang] = dict()
     count = 0
     for index, row in data.iterrows():
-        if count <= 2099:
+        if count <= 2299:
             count += 1
             continue
         if count % 100 == 0:
