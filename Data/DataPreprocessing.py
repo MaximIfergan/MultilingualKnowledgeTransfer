@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import gzip
-import tensorflow as tf
+# import tensorflow as tf  # when running on CSE -> tensorflow compiler had a lot of errors
 
 # ===============================      Global Variables:      ===============================
 
@@ -52,46 +52,49 @@ MINTAKA_TEST_PATH = "Datasets/Mintaka/mintaka_test.json"
 
 # ===============================      Global Functions:      ===============================
 
-def extract_QA_from_NQ(path, out_path):
-    def extract_answer(tokens, span):
-        """Reconstruct answer from token span and remove extra spaces."""
-        start, end = span["start_token"], span["end_token"]
-        ans = " ".join(tokens[start:end])
 
-        # Remove incorrect spacing around punctuation.
-        ans = ans.replace(" ,", ",").replace(" .", ".").replace(" %", "%")
-        ans = ans.replace(" - ", "-").replace(" : ", ":").replace(" / ", "/")
-        ans = ans.replace("( ", "(").replace(" )", ")")
-        ans = ans.replace("`` ", "\"").replace(" ''", "\"")
-        ans = ans.replace(" 's", "'s").replace("s ' ", "s' ")
-        return ans
+# When running on CSE -> tensorflow compiler had a lot of errors (Remove comment when needed)
 
-    with open(out_path, 'w', encoding="utf-8") as out_file, tf.io.gfile.GFile(path, "rb") as in_file:
-        count = 0
-        for line in gzip.open(in_file):
-            qa_dic = json.loads(line)
-
-            # Remove any examples with more than one answer.
-            if len(qa_dic['annotations'][0]['short_answers']) != 1:
-                continue
-
-            # Questions in NQ do not include a question mark.
-            question = qa_dic["question_text"] + "?"
-            answer_span = qa_dic['annotations'][0]['short_answers'][0]
-
-            # Handle the two document formats in NQ (tokens or text).
-            if "document_tokens" in qa_dic:
-                tokens = [t["token"] for t in qa_dic["document_tokens"]]
-            elif "document_text" in qa_dic:
-                tokens = qa_dic["document_text"].split(" ")
-            answer = extract_answer(tokens, answer_span)
-
-            # Write this line as <example_id>\<question>\t<answer>
-            out_file.write(f"{qa_dic['example_id']}, {question}, {answer}\n")
-
-            count += 1
-            if count % 5000 == 0:
-                print(count)
+# def extract_QA_from_NQ(path, out_path):
+#     def extract_answer(tokens, span):
+#         """Reconstruct answer from token span and remove extra spaces."""
+#         start, end = span["start_token"], span["end_token"]
+#         ans = " ".join(tokens[start:end])
+#
+#         # Remove incorrect spacing around punctuation.
+#         ans = ans.replace(" ,", ",").replace(" .", ".").replace(" %", "%")
+#         ans = ans.replace(" - ", "-").replace(" : ", ":").replace(" / ", "/")
+#         ans = ans.replace("( ", "(").replace(" )", ")")
+#         ans = ans.replace("`` ", "\"").replace(" ''", "\"")
+#         ans = ans.replace(" 's", "'s").replace("s ' ", "s' ")
+#         return ans
+#
+#     with open(out_path, 'w', encoding="utf-8") as out_file, tf.io.gfile.GFile(path, "rb") as in_file:
+#         count = 0
+#         for line in gzip.open(in_file):
+#             qa_dic = json.loads(line)
+#
+#             # Remove any examples with more than one answer.
+#             if len(qa_dic['annotations'][0]['short_answers']) != 1:
+#                 continue
+#
+#             # Questions in NQ do not include a question mark.
+#             question = qa_dic["question_text"] + "?"
+#             answer_span = qa_dic['annotations'][0]['short_answers'][0]
+#
+#             # Handle the two document formats in NQ (tokens or text).
+#             if "document_tokens" in qa_dic:
+#                 tokens = [t["token"] for t in qa_dic["document_tokens"]]
+#             elif "document_text" in qa_dic:
+#                 tokens = qa_dic["document_text"].split(" ")
+#             answer = extract_answer(tokens, answer_span)
+#
+#             # Write this line as <example_id>\<question>\t<answer>
+#             out_file.write(f"{qa_dic['example_id']}, {question}, {answer}\n")
+#
+#             count += 1
+#             if count % 5000 == 0:
+#                 print(count)
 
 
 # ==================================      Class Code:      ==================================

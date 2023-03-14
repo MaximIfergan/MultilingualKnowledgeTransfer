@@ -11,6 +11,7 @@ import json
 import matplotlib.pyplot as plt
 import Data.DataPreprocessing as DataPreprocessing
 import sys
+import pickle
 
 # ===============================      Global Variables:      ===============================
 
@@ -21,6 +22,8 @@ MKQA_TAG_ENTITIES_PATH = "Data/Datasets/MKQA/MKQA_Linked_Entities.json"
 NQ_TAG_ENTITIES_PATH = "Data/Datasets/NQ/NQ_Linked_Entities.json"
 MINTAKA_TRAIN_DATASET_PATH = "Data/Datasets/Mintaka/mintaka_train.json"
 POPQA_DATASET_PATH = "Data/Datasets/POPQA/popQA.tsv"
+FINETUNNING_ENTITIES_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
+ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/entities_to_pv.pkl"
 CLIENT = Client()
 
 # ===============================      Global Functions:      ===============================
@@ -80,6 +83,29 @@ def get_daily_average_page_view(entity_id, lang):
     if number_of_days == 0:
         return -1, -1
     return int(total_views / number_of_days), page_name
+
+
+def get_daily_average_pv(page, site):
+    """ this function for a given entity id and language returns the number of the average daily views of it's
+        wikipedia page in the given language """
+    try:
+        req = api.Request(site=site, parameters={'action': 'query',
+                                                 'titles': page.title(),
+                                                 'prop': 'pageviews'})
+        page_view_stats = req.submit()['query']['pages'][str(page.pageid)]['pageviews']
+    except (KeyError, pywikibot.exceptions.InvalidTitleError) as e:
+        return -1, -1
+    total_views = 0
+    number_of_days = 0
+    for key in page_view_stats:
+        if page_view_stats[key] is None:
+            continue
+        total_views += page_view_stats[key]
+        number_of_days += 1
+    if number_of_days == 0:
+        return -1, -1
+    return int(total_views / number_of_days)
+
 
 
 def get_number_of_appearance_in_pretraining(training_entities, entity_name, type="name"):
@@ -375,19 +401,45 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
     data.to_csv("PopQA_pv_stats.csv")
 
 
+def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_path=ENTITIES_TO_PV):
+    result_dict = dict()
+    sites_dict = dict()
+    count = 0
+    for lang in DataPreprocessing.FINETUNING_LANGS:
+        sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
+        result_dict[lang] = dict()
+    for line in open(entities_path, 'r', encoding='utf8'):
+        qa_entities = json.loads(line)
+        for entity in qa_entities["q_entities"] + qa_entities["a_entities"]:
+            # if count >= 200:
+            #     break
+            entity_id = entity[1]
+            wikidata_entity = CLIENT.get(entity_id, load=True)
+            for lang in DataPreprocessing.FINETUNING_LANGS:
+                if count % 5 == 0:
+                    with open(output_path, "wb") as fp:
+                        pickle.dump(result_dict, fp)
+                        print(f"Backup {count}")
+                if lang not in wikidata_entity.label:
+                    continue
+                entity_name = wikidata_entity.label[lang]
+                try:
+                    page = pywikibot.Page(sites_dict[lang], entity_name)
+                    entity_pv = get_daily_average_pv(page, sites_dict[lang])
+                except Exception as e:
+                    sys.stderr.write("\nError:" + str(e) + f"entity_name: {entity_name} lang: {lang} entity_id: {entity_id} " + "\n")
+                    continue
+                result_dict[lang][entity_id] = (entity_name, entity_pv)
+                count += 1
+    with open(output_path, "wb") as fp:
+        pickle.dump(result_dict, fp)
+
+
 def main():
-    # plot_corr_group_by_source("roots")
-    # df = create_df_for_stats()
-    # df.to_csv("EntityLinking/FinetuningDatasets/results_for_stats.csv")
-    # values = ["query_cities.csv", "query_companies.csv", "query_countries.csv", "query_religions.csv",
-    #           "MKQA", "NQ", "Mintaka", "PopQA"]
-    # df = df.loc[df['source'].isin(values)]
-    # df['source'].hist()
-    # plt.show()
-    # df = df[~df["name"].str.contains(" ")]
-    # df = df.loc[:, ~df.columns.str.contains('^Unnamed: 0.1')]
-    # print(get_daily_average_page_view("Q7049549", "en"))
-    add_to_PopQA_page_views("backup.csv")
+    # add_to_PopQA_page_views("backup.csv")
+    # save_entities_page_views()
+    # get_daily_average_page_view("Q2", "fr")
+    save_entities_page_views()
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
@@ -431,7 +483,7 @@ def separate_dataset_entities_linking():
                                                                       encoding="utf8") as MKQAoutput:
         with jsonlines.Writer(NQoutput) as NQwriter, jsonlines.Writer(MKQAoutput) as MKQAwriter:
             index = 0
-            for line in open("EntityLinking/FinetuningDatasets/Results/finetuning_entities_all.json", 'r',
+            for line in open("EntityLinking/FinetuningDatasets/Results/finetuning_entities.json", 'r',
                              encoding="utf8"):
                 qa = json.loads(line)
                 while df.iloc[index]["Dataset"] == "Mintaka":
