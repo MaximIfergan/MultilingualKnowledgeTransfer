@@ -22,8 +22,9 @@ MKQA_TAG_ENTITIES_PATH = "Data/Datasets/MKQA/MKQA_Linked_Entities.json"
 NQ_TAG_ENTITIES_PATH = "Data/Datasets/NQ/NQ_Linked_Entities.json"
 MINTAKA_TRAIN_DATASET_PATH = "Data/Datasets/Mintaka/mintaka_train.json"
 POPQA_DATASET_PATH = "Data/Datasets/POPQA/popQA.tsv"
-FINETUNNING_ENTITIES_PATH = "/cs/labs/oabend/maximifergan/MultilingualKnowledgeTransfer/EntityLinking/FinetuningDatasets/Results/finetuning_entities.json"
-ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/entities_to_pv.pkl"
+MKQA_ENTITIES_PATH = "Data/Datasets/MKQA/MKQA_Linked_Entities.json"
+MKQA_ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl"
+MINTAKA_ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/Mintaka_entities_to_pv.pkl"
 CLIENT = Client()
 
 # ===============================      Global Functions:      ===============================
@@ -221,7 +222,7 @@ def add_Mintaka_entities(df, training_entities, num_of_entities=float('inf')):
         data = json.load(fp)
         for qa in data:
 
-            # Limit the number of entities to add:
+            # Limit the number of entities to add :
             if count >= num_of_entities:
                 break
 
@@ -440,7 +441,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
     data.to_csv("PopQA_pv_stats.csv")
 
 
-def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_path=ENTITIES_TO_PV):
+def save_mkqa_entities_page_views(entities_path=MKQA_ENTITIES_PATH, output_path=MKQA_ENTITIES_TO_PV):
     # result_dict = dict()
     with open("EntityLinking/FinetuningDatasets/Results/entities_to_pv.pkl", "rb") as fp:
         result_dict = pickle.load(fp)
@@ -462,7 +463,7 @@ def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_pat
                 if count % 5000 == 0:
                     with open(output_path, "wb") as fp:
                         pickle.dump(result_dict, fp)
-                        print(f"Backup {count}")
+                        sys.stderr.write(f"\n=============== Backup {count} ===============\n")
                 if lang not in wikidata_entity.label:
                     continue
                 entity_name = wikidata_entity.label[lang]
@@ -478,11 +479,55 @@ def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_pat
         pickle.dump(result_dict, fp)
 
 
+def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, output_path=MINTAKA_ENTITIES_TO_PV):
+    result_dict = dict()
+    sites_dict = dict()
+    count = 0
+    for lang in DataPreprocessing.FINETUNING_LANGS:
+        sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
+        result_dict[lang] = dict()
+    with open(entities_path, 'r', encoding='utf-8') as fp:
+        data = json.load(fp)
+        for qa in data:
+
+            # Filter (Same as the one used to build finetuning dataset) :
+            if qa['answer']['answer'] is not None and len(qa['answer']['answer']) > 1:
+                continue
+
+            # Add all the QA-pair entities and their pv:
+            for entity in qa["questionEntity"]:
+                # if count >= 20:
+                #     break
+                if entity["entityType"] != "entity":
+                    continue
+                entity_id = entity["name"]
+                wikidata_entity = CLIENT.get(entity_id, load=True)
+                for lang in DataPreprocessing.FINETUNING_LANGS:
+                    if count % 1000 == 0:
+                        with open(output_path, "wb") as fp:
+                            pickle.dump(result_dict, fp)
+                            sys.stderr.write(f"\n=============== Backup {count} ===============\n")
+                    if lang not in wikidata_entity.label:
+                        continue
+                    entity_name = wikidata_entity.label[lang]
+                    try:
+                        page = pywikibot.Page(sites_dict[lang], entity_name)
+                        entity_pv = get_daily_average_pv(page, sites_dict[lang])
+                    except Exception as e:
+                        sys.stderr.write("\nError:" + str(e) + f"entity_name: {entity_name} lang: {lang} entity_id: {entity_id} " + "\n")
+                        continue
+                    result_dict[lang][entity_id] = (entity_name, entity_pv)
+                    count += 1
+    with open(output_path, "wb") as fp:
+        pickle.dump(result_dict, fp)
+
+
 def main():
-    add_to_PopQA_page_views("backup.csv")
-    # save_entities_page_views()
+    save_mintaka_entities_page_views()
+    # TODO: clean up form old saving
+    # add_to_PopQA_page_views("backup.csv")
     # get_daily_average_page_view("Q2", "fr")
-    # save_entities_page_views(entities_path="Data/Datasets/MKQA/MKQA_Linked_Entities.json", output_path="EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl")
+    # save_entities_page_views()
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 

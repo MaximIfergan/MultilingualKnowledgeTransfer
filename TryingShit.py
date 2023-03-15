@@ -92,7 +92,7 @@ import requests
 
 import pickle
 
-with open("EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl", "rb") as fp:
+with open("EntityLinking/FinetuningDatasets/Results/Mintaka_entities_to_pv.pkl", "rb") as fp:
     b = pickle.load(fp)
 print()
 
