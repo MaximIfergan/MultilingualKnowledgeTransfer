@@ -94,7 +94,7 @@ def get_daily_average_pv(page, site):
                                                  'prop': 'pageviews'})
         page_view_stats = req.submit()['query']['pages'][str(page.pageid)]['pageviews']
     except (KeyError, pywikibot.exceptions.InvalidTitleError) as e:
-        return -1, -1
+        return -1
     total_views = 0
     number_of_days = 0
     for key in page_view_stats:
@@ -103,7 +103,7 @@ def get_daily_average_pv(page, site):
         total_views += page_view_stats[key]
         number_of_days += 1
     if number_of_days == 0:
-        return -1, -1
+        return -1
     return int(total_views / number_of_days)
 
 
@@ -403,7 +403,8 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
             # Extract labels:
             s_label = s_wikidata_entity.label[lang] if lang in s_wikidata_entity.label else -1
             o_label = o_wikidata_entity.label[lang] if lang in o_wikidata_entity.label else -1
-            s_pv, o_pv = -1, -1
+            s_pv = -1
+            o_pv = -1
 
             # Get pv for subject:
             if s_id in cash_memory[lang]:
@@ -447,7 +448,7 @@ def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_pat
     count = 0
     for lang in DataPreprocessing.FINETUNING_LANGS:
         sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
-        result_dict[lang] = dict()
+        # result_dict[lang] = dict()
     for line in open(entities_path, 'r', encoding='utf8'):
         qa_entities = json.loads(line)
         for entity in qa_entities["q_entities"] + qa_entities["a_entities"]:
@@ -458,7 +459,7 @@ def save_entities_page_views(entities_path=FINETUNNING_ENTITIES_PATH, output_pat
                 continue
             wikidata_entity = CLIENT.get(entity_id, load=True)
             for lang in DataPreprocessing.FINETUNING_LANGS:
-                if count % 10000 == 0:
+                if count % 5000 == 0:
                     with open(output_path, "wb") as fp:
                         pickle.dump(result_dict, fp)
                         print(f"Backup {count}")
@@ -481,8 +482,7 @@ def main():
     add_to_PopQA_page_views("backup.csv")
     # save_entities_page_views()
     # get_daily_average_page_view("Q2", "fr")
-    # save_entities_page_views(entities_path="Data/Datasets/MKQA/MKQA_Linked_Entities.json",
-                             # output_path="EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl")
+    # save_entities_page_views(entities_path="Data/Datasets/MKQA/MKQA_Linked_Entities.json", output_path="EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl")
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 

@@ -9,7 +9,6 @@ from huggingface_hub import hf_hub_download
 def main():
     # QA_Linking.main()
     EntityStats.main()
-    # Find_a_proper_name.main()
 
 if __name__ == "__main__":
     main()

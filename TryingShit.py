@@ -90,11 +90,11 @@ import requests
 # except Exception as e:
 #     sys.stderr.write(str(e))
 
-# import pickle
-#
-# with open("EntityLinking/FinetuningDatasets/Results/entities_to_pv (copy).pkl", "rb") as fp:
-#     b = pickle.load(fp)
-# print()
+import pickle
+
+with open("EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl", "rb") as fp:
+    b = pickle.load(fp)
+print()
 
 
 #  ===============================  another script for multi process   =======================
