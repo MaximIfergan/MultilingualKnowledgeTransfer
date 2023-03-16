@@ -27,6 +27,7 @@ MKQA_ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/MKQA_entities_to
 MINTAKA_ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/Mintaka_entities_to_pv.pkl"
 CLIENT = Client()
 
+
 # ===============================      Global Functions:      ===============================
 
 
@@ -106,7 +107,6 @@ def get_daily_average_pv(page, site):
     if number_of_days == 0:
         return -1
     return int(total_views / number_of_days)
-
 
 
 def get_number_of_appearance_in_pretraining(training_entities, entity_name, type="name"):
@@ -333,10 +333,14 @@ def create_df_for_stats():
     df = add_NQ_entities(df, training_entities, num_of_entities=300)
     df = add_Mintaka_entities(df, training_entities, num_of_entities=300)
     df = add_PopQA_entities(df, training_entities, num_of_entities=500)
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_cities.csv")
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_companies.csv")
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_countries.csv")
-    add_entities_from_query(df, training_entities, "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_religions.csv")
+    add_entities_from_query(df, training_entities,
+                            "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_cities.csv")
+    add_entities_from_query(df, training_entities,
+                            "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_companies.csv")
+    add_entities_from_query(df, training_entities,
+                            "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_countries.csv")
+    add_entities_from_query(df, training_entities,
+                            "EntityLinking/FinetuningDatasets/QueriesResultsForStats/query_religions.csv")
     df = add_pretraining_dataset_appearance(df)
     return df
 
@@ -363,8 +367,7 @@ def plot_corr_group_by_source(dataset="c4"):
 
 
 def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
-
-    sites_dict = dict()   # Save all the Wikipedia sites in use:
+    sites_dict = dict()  # Save all the Wikipedia sites in use:
     cash_memory = dict()  # Cash the memory of entities that were in use:
     for lang in DataPreprocessing.FINETUNING_LANGS:
         sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
@@ -378,7 +381,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
 
     # Load the data:
     # data = pd.read_csv(path, sep='\t')   # Start form scratch
-    data = pd.read_csv(path, delimiter=",")   # Start after some extractions
+    data = pd.read_csv(path, delimiter=",")  # Start after some extractions
 
     count = 0  # For debuging
     for index, row in data.iterrows():
@@ -415,7 +418,8 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
                     s_page = pywikibot.Page(sites_dict[lang], s_label)
                     s_pv = get_daily_average_pv(s_page, sites_dict[lang])
                 except Exception as e:
-                    sys.stderr.write("\nError:" + str(e) + f"entity_name: {s_label} lang: {lang} entity_id: {s_id} " + "\n")
+                    sys.stderr.write(
+                        "\nError:" + str(e) + f"entity_name: {s_label} lang: {lang} entity_id: {s_id} " + "\n")
                     continue
                 cash_memory[lang][s_id] = (s_pv, s_label)
 
@@ -427,7 +431,8 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
                     o_page = pywikibot.Page(sites_dict[lang], o_label)
                     o_pv = get_daily_average_pv(o_page, sites_dict[lang])
                 except Exception as e:
-                    sys.stderr.write("\nError:" + str(e) + f"entity_name: {o_label} lang: {lang} entity_id: {o_id} " + "\n")
+                    sys.stderr.write(
+                        "\nError:" + str(e) + f"entity_name: {o_label} lang: {lang} entity_id: {o_id} " + "\n")
                     continue
                 cash_memory[lang][o_id] = (o_pv, o_label)
 
@@ -471,7 +476,8 @@ def save_mkqa_entities_page_views(entities_path=MKQA_ENTITIES_PATH, output_path=
                     page = pywikibot.Page(sites_dict[lang], entity_name)
                     entity_pv = get_daily_average_pv(page, sites_dict[lang])
                 except Exception as e:
-                    sys.stderr.write("\nError:" + str(e) + f"entity_name: {entity_name} lang: {lang} entity_id: {entity_id} " + "\n")
+                    sys.stderr.write(
+                        "\nError:" + str(e) + f"entity_name: {entity_name} lang: {lang} entity_id: {entity_id} " + "\n")
                     continue
                 result_dict[lang][entity_id] = (entity_name, entity_pv)
                 count += 1
@@ -480,12 +486,14 @@ def save_mkqa_entities_page_views(entities_path=MKQA_ENTITIES_PATH, output_path=
 
 
 def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, output_path=MINTAKA_ENTITIES_TO_PV):
-    result_dict = dict()
+    # result_dict = dict()
+    with open(MINTAKA_ENTITIES_TO_PV, "rb") as fp:
+        result_dict = pickle.load(fp)
     sites_dict = dict()
     count = 0
     for lang in DataPreprocessing.FINETUNING_LANGS:
         sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
-        result_dict[lang] = dict()
+        # result_dict[lang] = dict()
     with open(entities_path, 'r', encoding='utf-8') as fp:
         data = json.load(fp)
         for qa in data:
@@ -501,20 +509,23 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
                 if entity["entityType"] != "entity":
                     continue
                 entity_id = entity["name"]
+                if entity_id in result_dict["en"]:
+                    continue
                 wikidata_entity = CLIENT.get(entity_id, load=True)
                 for lang in DataPreprocessing.FINETUNING_LANGS:
                     if count % 1000 == 0:
                         with open(output_path, "wb") as fp:
                             pickle.dump(result_dict, fp)
                             sys.stderr.write(f"\n=============== Backup {count} ===============\n")
-                    if lang not in wikidata_entity.label:
+                    if wikidata_entity.label is None or lang not in wikidata_entity.label:
                         continue
                     entity_name = wikidata_entity.label[lang]
                     try:
                         page = pywikibot.Page(sites_dict[lang], entity_name)
                         entity_pv = get_daily_average_pv(page, sites_dict[lang])
                     except Exception as e:
-                        sys.stderr.write("\nError:" + str(e) + f"entity_name: {entity_name} lang: {lang} entity_id: {entity_id} " + "\n")
+                        sys.stderr.write("\nError:" + str(
+                            e) + f"entity_name: {entity_name} lang: {lang} entity_id: {entity_id} " + "\n")
                         continue
                     result_dict[lang][entity_id] = (entity_name, entity_pv)
                     count += 1
@@ -528,6 +539,7 @@ def main():
     # add_to_PopQA_page_views("backup.csv")
     # get_daily_average_page_view("Q2", "fr")
     # save_entities_page_views()
+
 
 # # =============== Check for number of page views in wikipedia with page view: ======================
 
