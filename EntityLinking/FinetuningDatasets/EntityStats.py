@@ -506,7 +506,7 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
             for entity in qa["questionEntity"]:
                 # if count >= 20:
                 #     break
-                if entity["entityType"] != "entity":
+                if entity["entityType"] != "entity" or entity["name"] is None:
                     continue
                 entity_id = entity["name"]
                 if entity_id in result_dict["en"]:
