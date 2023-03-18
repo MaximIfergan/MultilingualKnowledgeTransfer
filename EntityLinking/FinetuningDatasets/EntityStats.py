@@ -513,7 +513,7 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
                     continue
                 wikidata_entity = CLIENT.get(entity_id, load=True)
                 for lang in DataPreprocessing.FINETUNING_LANGS:
-                    if count % 1000 == 0:
+                    if count % 18 == 0:
                         with open(output_path, "wb") as fp:
                             pickle.dump(result_dict, fp)
                             sys.stderr.write(f"\n=============== Backup {count} ===============\n")
