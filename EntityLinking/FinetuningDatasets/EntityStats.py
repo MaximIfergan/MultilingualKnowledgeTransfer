@@ -25,6 +25,8 @@ POPQA_DATASET_PATH = "Data/Datasets/POPQA/popQA.tsv"
 MKQA_ENTITIES_PATH = "Data/Datasets/MKQA/MKQA_Linked_Entities.json"
 MKQA_ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl"
 MINTAKA_ENTITIES_TO_PV = "EntityLinking/FinetuningDatasets/Results/Mintaka_entities_to_pv.pkl"
+MINTAKA_DEV_DATASET_PATH = "Data/Datasets/Mintaka/mintaka_dev.json"
+MINTAKA_TEST_DATASET_PATH = "Data/Datasets/Mintaka/mintaka_test.json"
 CLIENT = Client()
 
 
@@ -534,7 +536,9 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
 
 
 def main():
-    save_mintaka_entities_page_views()
+    save_mintaka_entities_page_views(entities_path=MINTAKA_DEV_DATASET_PATH)
+    sys.stderr.write("\n\n\nEnded Dev start Test!\n\n\n")
+    save_mintaka_entities_page_views(entities_path=MINTAKA_TEST_DATASET_PATH)
     # TODO: clean up form old saving
     # add_to_PopQA_page_views("backup.csv")
     # get_daily_average_page_view("Q2", "fr")
