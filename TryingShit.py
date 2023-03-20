@@ -90,15 +90,11 @@ import requests
 # except Exception as e:
 #     sys.stderr.write(str(e))
 
-# import pickle
+import pickle
 
-# with open("EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl", "rb") as fp:
-#     b = pickle.load(fp)
-# print()
-from wikidata.client import Client
-CLIENT = Client()
-wikidata_entity = CLIENT.get("Q1", load=True)
-a = wikidata_entity.label
+with open("EntityLinking/Mintaka_entities_to_pv.pkl", "rb") as fp:
+    b = pickle.load(fp)
+print()
 
 #  ===============================  another script for multi process   =======================
 #
