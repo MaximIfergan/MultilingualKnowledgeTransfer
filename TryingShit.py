@@ -8,25 +8,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
+
 def print_title(title):
     res = "      " + title + "      "
     while (len(res) < 90):
         res = "=" + res + "="
     print("# " + res)
 
-# print_title("Merge all the mapping to pv dictionaries:")
 
+# print_title("Fix entity2pv dict:")
 
+import matplotlib as mpl
+mpl.use('TkAgg')  # !IMPORTANT
+x = np.array([1, 2, 4, 8, 9, 17])
+plt.hist(x, 3)
+plt.show()
 
-
-
-
-
-
-
-
-
-
+# # ==============================      Fix entity2pv dict:      ==============================
+#
+# with open("EntityLinking/FinetuningDatasets/Results/entity2pv.pkl", "rb") as fp:
+#     entity2pv = pickle.load(fp)
+#
+# for lang in DataPreprocessing.FINETUNING_LANGS:
+#     for q in entity2pv[lang]:
+#         if entity2pv[lang][q][0] == (-1, -1):
+#             entity2pv[lang][q] = (-1, entity2pv[lang][q][1])
+#         if entity2pv[lang][q][1] == (-1, -1):
+#             entity2pv[lang][q] = (entity2pv[lang][q][0], -1)
+#         if isinstance(entity2pv[lang][q][1], str):
+#             entity2pv[lang][q] = (entity2pv[lang][q][1], entity2pv[lang][q][0])
+#
+# with open("EntityLinking/FinetuningDatasets/Results/entity2pv1.pkl", "wb") as fp:
+#     pickle.dump(entity2pv, fp)
 
 
 # # ===================      Merge all the mapping to pv dictionaries:      ===================
