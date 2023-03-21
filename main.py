@@ -2,13 +2,14 @@
 # import pandas as pd
 import EntityLinking.FinetuningDatasets.QA_Linking as QA_Linking
 import EntityLinking.FinetuningDatasets.EntityStats as EntityStats
-import LingualTransfer.TransferStats as Find_a_proper_name
+import LingualTransfer.TransferStats as TransferStats
 from huggingface_hub import hf_hub_download
 
 
 def main():
     # QA_Linking.main()
-    EntityStats.main()
+    # EntityStats.main()
+    TransferStats.main()
 
 if __name__ == "__main__":
     main()
