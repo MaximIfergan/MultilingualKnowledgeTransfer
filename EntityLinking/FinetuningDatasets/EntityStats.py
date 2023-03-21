@@ -537,6 +537,8 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
                 answer_entity = qa['answer']['answer'][0]
                 if re.match("^Q[1-9]+", answer_entity["name"]):
                     entity_id = answer_entity["name"]
+                    if entity_id in result_dict["en"]:
+                        continue
                     try:
                         wikidata_entity = CLIENT.get(entity_id, load=True)
                     except Exception as e:
