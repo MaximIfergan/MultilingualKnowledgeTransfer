@@ -1,6 +1,6 @@
 import json
 import re
-
+import Data.DataPreprocessing as DataPreprocessing
 import jsonlines
 import pandas as pd
 import spacy
@@ -14,8 +14,27 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-# print_title("Bulid id2entities dict:")
+# print_title("Turn PopQA to map pv:")
 
+# =============================      Turn PopQA to map pv:      =============================
+
+# data = pd.read_csv("EntityLinking/FinetuningDatasets/Results/PopQA_pv_stats.csv", delimiter=",")
+#
+# entity2pv = dict()
+# for lang in DataPreprocessing.FINETUNING_LANGS:
+#     entity2pv[lang] = dict()
+#
+# for index, row in data.iterrows():
+#     for lang in DataPreprocessing.FINETUNING_LANGS:
+#         s_id = row["s_uri"].split("/")[-1]  # subject id
+#         o_id = row["o_uri"].split("/")[-1]  # object id
+#         if str(row[lang + "_s_pv"]) != "-1":
+#             entity2pv[lang][s_id] = (row[lang + "_s_pv"], row[lang + "_s_label"])
+#         if str(row[lang + "_o_pv"]) != "-1":
+#             entity2pv[lang][o_id] = (row[lang + "_o_pv"], row[lang + "_o_label"])
+#
+# with open("EntityLinking/FinetuningDatasets/Results/PopQA_entities_to_pv.pkl", "wb") as fp:
+#     pickle.dump(entity2pv, fp)
 
 # ============================      Build id2entities dict:      ============================
 
@@ -137,6 +156,6 @@ def print_title(title):
 # ============================      Load pickle dictionary:      ============================
 
 
-# with open("EntityLinking/Mintaka_entities_to_pv.pkl", "rb") as fp:
-#     b = pickle.load(fp)
-# print()
+with open("EntityLinking/FinetuningDatasets/Results/PopQA_entities_to_pv.pkl", "rb") as fp:
+    b = pickle.load(fp)
+print()

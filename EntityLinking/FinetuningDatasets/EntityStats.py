@@ -537,7 +537,11 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
                 answer_entity = qa['answer']['answer'][0]
                 if re.match("^Q[1-9]+", answer_entity["name"]):
                     entity_id = answer_entity["name"]
-                    wikidata_entity = CLIENT.get(entity_id, load=True)
+                    try:
+                        wikidata_entity = CLIENT.get(entity_id, load=True)
+                    except Exception as e:
+                        sys.stderr.write("\nError:" + str(e) + f"entity_id: {entity_id} " + "\n")
+                        continue
                     for lang in DataPreprocessing.FINETUNING_LANGS:
                         if count % 1000 == 0:
                             with open(output_path, "wb") as fp:
