@@ -80,7 +80,7 @@ class TransferStats:
             # average_dict[lang] = sum(average_dict[lang]) / len(average_dict[lang])
             # average_dict[lang] = min(average_dict[lang])
             average_dict[lang].sort()
-            average_dict[lang] = average_dict[lang][:500]
+            average_dict[lang] = average_dict[lang][:100]
             plt.hist(average_dict[lang], 15)
             plt.title(lang)
             plt.show()
