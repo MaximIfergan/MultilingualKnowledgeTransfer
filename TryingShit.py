@@ -14,7 +14,46 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-# print_title("Turn PopQA to map pv:")
+# print_title("Merge all the mapping to pv dictionaries:")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # ===================      Merge all the mapping to pv dictionaries:      ===================
+#
+# entity2pv = dict()
+#
+# # === MKQA ===
+# with open("EntityLinking/FinetuningDatasets/Results/MKQA_entities_to_pv.pkl", "rb") as fp:
+#     mkqa_dict = pickle.load(fp)
+#
+# # === Mintaka ===
+# with open("EntityLinking/FinetuningDatasets/Results/Mintaka_entities_to_pv.pkl", "rb") as fp:
+#     mintaka_dict = pickle.load(fp)
+#
+# # === PopQA ===
+# with open("EntityLinking/FinetuningDatasets/Results/PopQA_entities_to_pv.pkl", "rb") as fp:
+#     popqa_dict = pickle.load(fp)
+#
+# for lang in DataPreprocessing.FINETUNING_LANGS:
+#     entity2pv[lang] = dict()
+#     entity2pv[lang].update(mkqa_dict[lang])
+#     entity2pv[lang].update(mintaka_dict[lang])
+#     entity2pv[lang].update(popqa_dict[lang])
+#
+# with open("EntityLinking/FinetuningDatasets/Results/entity2pv.pkl", "wb") as fp:
+#     pickle.dump(entity2pv, fp)
+
 
 # =============================      Turn PopQA to map pv:      =============================
 
@@ -156,6 +195,6 @@ def print_title(title):
 # ============================      Load pickle dictionary:      ============================
 
 
-with open("EntityLinking/FinetuningDatasets/Results/PopQA_entities_to_pv.pkl", "rb") as fp:
-    b = pickle.load(fp)
-print()
+# with open("EntityLinking/FinetuningDatasets/Results/PopQA_entities_to_pv.pkl", "rb") as fp:
+#     b = pickle.load(fp)
+# print()
