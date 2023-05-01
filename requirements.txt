@@ -12,3 +12,4 @@ jsonlines~=3.1.0
 pywikibot~=7.7.3
 nltk~=3.8.1
 tqdm~=4.64.1
+Wikidata==0.7.0
