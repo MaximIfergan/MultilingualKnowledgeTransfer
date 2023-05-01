@@ -269,10 +269,13 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.save_text(os.path.join(output_dir, "logs.txt"))
 
 
-if __name__ == "__main__":
+def main():
+
+    # After training path: "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/"
+
     model_params = {
         "MODEL": "mt5-base",
-        "MODEL_DIR": "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/",
+        "MODEL_DIR": "google/mt5-base",
         "TRAIN_BATCH_SIZE": 8,
         "VALID_BATCH_SIZE": 8,
         "TRAIN_EPOCHS": 4,
@@ -282,7 +285,7 @@ if __name__ == "__main__":
         "SEED": 18,
     }
 
-    df = pd.read_csv('Data/Datasets/PreprocessDataset.csv')
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1).iloc[:80, :]
 
     MT5Trainer(
         dataframe=df,

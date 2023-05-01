@@ -136,7 +136,7 @@ class DataPreprocessing:
                     "Type": qa['answers'][lang][0]["type"],
                     "Id": str(qa["example_id"]),
                     "Language": lang,
-                    "Question": question,
+                    "Question": str(question),
                     "Answer": str(qa['answers'][lang][0]["text"]).replace("\n", "")
                 })
 
@@ -166,8 +166,8 @@ class DataPreprocessing:
                     "Type": "nq",
                     "Id": str(qa[0]),
                     "Language": "en",
-                    "Question": question,
-                    "Answer": answer
+                    "Question": str(question),
+                    "Answer": str(answer)
                 })
         return data_rows
 
@@ -203,7 +203,7 @@ class DataPreprocessing:
                         "Type": qa["complexityType"],
                         "Id": str(qa["id"]),
                         "Language": lang,
-                        "Question": question,
+                        "Question": str(question),
                         "Answer": str(answer[lang]).replace("\n", "")
                     })
         return data_rows
