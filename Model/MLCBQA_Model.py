@@ -244,7 +244,7 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     val_loader = DataLoader(val_set, **val_params)
     CONSOLE.log(f"[Dataset]: Building Completed.")
 
-    CONSOLE.log(f"[Fine-tuning]: Fine-tuning Model")
+    CONSOLE.log(f"[Finetuning]: Finetuning Model")
     # Init optimizer:
     optimizer = torch.optim.Adam(params=model.parameters(), lr=model_params["LEARNING_RATE"])
 
@@ -258,7 +258,6 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.log(f"[Model]: Saving Model")
     path = os.path.join(output_dir, "model_files")
     model.save_pretrained(path)
-    tokenizer.save_pretrained(path)
 
     # Evaluate model:
     CONSOLE.log(f"[Evaluation]: Initiating Evaluation")

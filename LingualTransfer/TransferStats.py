@@ -44,7 +44,7 @@ class TransferStats:
             df = self.qa_results_path[self.qa_results_path[filter_dataset["col"]] == filter_dataset["value"]]
         only_correct_answers = df[df['F1'] > 0.5]
         correct_ids = set(only_correct_answers["Id"])
-        return round(only_correct_answers.shape[0] / (len(correct_ids) * len(DataPreprocessing.FINETUNING_LANGS)), 3)
+        return round(only_correct_answers.shape[0] / (len(correct_ids) * len(DataPreprocessing.FINETUNING_LANGS_INTERSEC)), 3)
         # number_of_missed_answers = 0
         # total = 0
         # for index, row in df.iterrows():
@@ -64,7 +64,7 @@ class TransferStats:
         only_correct_answers.loc[:, "count"] = 1
         gb_num_correct_lang = only_correct_answers.groupby(["Id"])["count"].sum()
         num_of_question_that_are_correct_in_all_lang = \
-            (gb_num_correct_lang[gb_num_correct_lang == len(DataPreprocessing.FINETUNING_LANGS)]).shape[0]
+            (gb_num_correct_lang[gb_num_correct_lang == len(DataPreprocessing.FINETUNING_LANGS_INTERSEC)]).shape[0]
         return round(num_of_question_that_are_correct_in_all_lang / len(correct_ids), 3)
 
     def get_success_average_pv(self, failure=False):
@@ -75,7 +75,7 @@ class TransferStats:
         average_dict = {}
         count_id = 0
         count_pv = 0
-        for lang in DataPreprocessing.FINETUNING_LANGS:
+        for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
             average_dict[lang] = []
         for index, row in df.iterrows():
             if row["Id"] in self.id2entities and self.id2entities[str(row["Id"])]:
@@ -92,7 +92,7 @@ class TransferStats:
             if not average_pv:
                 continue
             average_dict[row["Language"]].append(sum(average_pv) / len(average_pv))
-        for lang in DataPreprocessing.FINETUNING_LANGS:
+        for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
             # if lang != "ar":
             #     continue
             # average_dict[lang] = round(sum(average_dict[lang]) / len(average_dict[lang]), 2)

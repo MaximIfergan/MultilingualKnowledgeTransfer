@@ -5,22 +5,12 @@ import gzip
 
 # ===============================      Global Variables:      ===============================
 
-FINETUNING_LANGS = ["en",  # English
-                    "ar",  # Arabic
-                    "de",  # German
-                    "ja",  # Japanese
-                    "pt",  # Portuguese
-                    "es",  # Spanish
-                    "it",  # Italian
-                    "fr"]  # French
+FINETUNING_LANGS_INTERSEC = ["en", "ar", "de", "ja", "pt", "es", "it", "fr"]
 
-# Based on the spotlight DBpedia languages
-FINETUNING_LANGS_NEW = ["en",  # English
-                    "de",  # German
-                    "pt",  # Portuguese
-                    "es",  # Spanish
-                    "it",  # Italian
-                    "fr"]  # French
+MINTAKA_LANGS = ["en", "ar", "de", "ja", "pt", "es", "it", "fr", "hi"]
+
+MKQA_LANGS = ["en", "ar", "da", "de", "es", "fi", "fr", "he", "hu", "it", "ja", "km", "ko", "ms", "nl", "no",
+                         "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh_cn"]
 
 DATASETS_TYPES = ["binary",
                   "yesno",
@@ -36,6 +26,7 @@ DATASETS_TYPES = ["binary",
                   "entity",
                   "number",
                   "number_with_unit"]
+
 MAX_WORDS_IN_ANSWER = 10
 MKQA_TRAIN_DEV_RATIO = 0.9
 
@@ -134,7 +125,7 @@ class DataPreprocessing:
                 len(dic['answers']['en'][0]['text'].split()) < MAX_WORDS_IN_ANSWER]  # remove long answers
         data_rows = []
         for qa in data:
-            for lang in FINETUNING_LANGS:
+            for lang in MKQA_LANGS:
                 if str(qa['answers'][lang][0]["text"]).replace("\n", "") in ['None', ""]:
                     continue
                 question = str(qa['queries'][lang]).replace("\n", "")
@@ -192,12 +183,16 @@ class DataPreprocessing:
 
                 # extract answer
                 if qa['answer']['answer'] is None or qa['answer']['answerType'] in ["boolean", "date", "string"]:
-                    answer = {lang: qa['answer']['mention'] for lang in FINETUNING_LANGS}
+                    answer = {lang: qa['answer']['mention'] for lang in FINETUNING_LANGS_INTERSEC}
                 elif qa['answer']['answerType'] == "numerical":
-                    answer = {lang: qa['answer']['answer'][0] for lang in FINETUNING_LANGS}
+                    answer = {lang: qa['answer']['answer'][0] for lang in FINETUNING_LANGS_INTERSEC}
                 else:
                     answer = qa['answer']['answer'][0]['label']
-                for lang in FINETUNING_LANGS:
+                for lang in MINTAKA_LANGS:
+                    if lang not in answer:
+                        assert lang == "hi"
+                        answer[lang] = answer["en"]
+                        continue
                     question = str(qa["translations"][lang] if lang != 'en' else qa["question"]).replace("\n", "")
                     question = question if question[-1] == '?' else question + '?'
                     if str(answer[lang]).replace("\n", "") in ['None', ""]:
@@ -233,4 +228,4 @@ if __name__ == "__main__":
     dp = DataPreprocessing()
     dp.preprocess()
     dp.print_dataset_details()
-    # dp.data.to_csv("Datasets/PreprocessDataset.csv", encoding='utf-8')  # Save the dataset
+    dp.data.to_csv("Datasets/PreprocessDatasetAllLangs.csv", encoding='utf-8')  # Save the dataset

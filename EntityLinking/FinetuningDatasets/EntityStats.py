@@ -372,7 +372,7 @@ def plot_corr_group_by_source(dataset="c4"):
 def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
     sites_dict = dict()  # Save all the Wikipedia sites in use:
     cash_memory = dict()  # Cash the memory of entities that were in use:
-    for lang in DataPreprocessing.FINETUNING_LANGS:
+    for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
         sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
         cash_memory[lang] = dict()
 
@@ -405,7 +405,7 @@ def add_to_PopQA_page_views(path=POPQA_DATASET_PATH):
         s_wikidata_entity = CLIENT.get(s_id, load=True)  # wikidata subject
         o_wikidata_entity = CLIENT.get(o_id, load=True)  # wikidata object
 
-        for lang in DataPreprocessing.FINETUNING_LANGS:
+        for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
 
             # Extract labels:
             s_label = s_wikidata_entity.label[lang] if lang in s_wikidata_entity.label else -1
@@ -455,7 +455,7 @@ def save_mkqa_entities_page_views(entities_path=MKQA_ENTITIES_PATH, output_path=
         result_dict = pickle.load(fp)
     sites_dict = dict()
     count = 0
-    for lang in DataPreprocessing.FINETUNING_LANGS:
+    for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
         sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
         # result_dict[lang] = dict()
     for line in open(entities_path, 'r', encoding='utf8'):
@@ -467,7 +467,7 @@ def save_mkqa_entities_page_views(entities_path=MKQA_ENTITIES_PATH, output_path=
             if entity_id in result_dict["en"]:
                 continue
             wikidata_entity = CLIENT.get(entity_id, load=True)
-            for lang in DataPreprocessing.FINETUNING_LANGS:
+            for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
                 if count % 5000 == 0:
                     with open(output_path, "wb") as fp:
                         pickle.dump(result_dict, fp)
@@ -494,7 +494,7 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
         result_dict = pickle.load(fp)
     sites_dict = dict()
     count = 0
-    for lang in DataPreprocessing.FINETUNING_LANGS:
+    for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
         sites_dict[lang] = pywikibot.Site(lang, "wikipedia")
         # result_dict[lang] = dict()
     with open(entities_path, 'r', encoding='utf-8') as fp:
@@ -544,7 +544,7 @@ def save_mintaka_entities_page_views(entities_path=MINTAKA_TRAIN_DATASET_PATH, o
                     except Exception as e:
                         sys.stderr.write("\nError:" + str(e) + f"entity_id: {entity_id} " + "\n")
                         continue
-                    for lang in DataPreprocessing.FINETUNING_LANGS:
+                    for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
                         if count % 1000 == 0:
                             with open(output_path, "wb") as fp:
                                 pickle.dump(result_dict, fp)

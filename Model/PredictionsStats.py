@@ -101,14 +101,14 @@ class PredictionsStats:
 
         fig, ax = plt.subplots()
         width = 0.35  # the width of the bars: can also be len(x) sequence
-        labels = list(range(1, len(DataPreprocessing.FINETUNING_LANGS) + 1))
-        sum = np.zeros(len(DataPreprocessing.FINETUNING_LANGS))
-        for lang in DataPreprocessing.FINETUNING_LANGS:
-            num_of_questions = np.zeros(len(DataPreprocessing.FINETUNING_LANGS))
+        labels = list(range(1, len(DataPreprocessing.FINETUNING_LANGS_INTERSEC) + 1))
+        sum = np.zeros(len(DataPreprocessing.FINETUNING_LANGS_INTERSEC))
+        for lang in DataPreprocessing.FINETUNING_LANGS_INTERSEC:
+            num_of_questions = np.zeros(len(DataPreprocessing.FINETUNING_LANGS_INTERSEC))
             dfgbt = df[df["Language"] == lang].groupby('correct')['count'].sum()
             for i in dfgbt.axes[0]:
                 num_of_questions[i - 1] = dfgbt[i]
-            num_of_questions = num_of_questions / np.array(range(1, len(DataPreprocessing.FINETUNING_LANGS) + 1))
+            num_of_questions = num_of_questions / np.array(range(1, len(DataPreprocessing.FINETUNING_LANGS_INTERSEC) + 1))
             ax.bar(labels, num_of_questions, width, label=lang, bottom=sum)
             sum += num_of_questions
 
@@ -130,14 +130,14 @@ class PredictionsStats:
 
         fig, ax = plt.subplots()
         width = 0.35  # the width of the bars: can also be len(x) sequence
-        labels = list(range(1, len(DataPreprocessing.FINETUNING_LANGS) + 1))
-        sum = np.zeros(len(DataPreprocessing.FINETUNING_LANGS))
+        labels = list(range(1, len(DataPreprocessing.FINETUNING_LANGS_INTERSEC) + 1))
+        sum = np.zeros(len(DataPreprocessing.FINETUNING_LANGS_INTERSEC))
         for type in DataPreprocessing.DATASETS_TYPES:
-            num_of_questions = np.zeros(len(DataPreprocessing.FINETUNING_LANGS))
+            num_of_questions = np.zeros(len(DataPreprocessing.FINETUNING_LANGS_INTERSEC))
             dfgbt = df[df["Type"] == type].groupby('correct')['count'].sum()
             for i in dfgbt.axes[0]:
                 num_of_questions[i - 1] = dfgbt[i]
-            num_of_questions = num_of_questions / np.array(range(1, len(DataPreprocessing.FINETUNING_LANGS) + 1))
+            num_of_questions = num_of_questions / np.array(range(1, len(DataPreprocessing.FINETUNING_LANGS_INTERSEC) + 1))
             ax.bar(labels, num_of_questions, width, label=type, bottom=sum)
             sum += num_of_questions
 
@@ -151,7 +151,7 @@ class PredictionsStats:
     def plot_types_distribution_for_evaluation_set(self):
         df = self.data[self.data["Dataset"] != "NQ"]
         df["count"] = 1
-        df = df.groupby(["Type"])["count"].sum() / len(DataPreprocessing.FINETUNING_LANGS)
+        df = df.groupby(["Type"])["count"].sum() / len(DataPreprocessing.FINETUNING_LANGS_INTERSEC)
         labels = list(df.axes[0])
         count = [int(t) for t in list(df)]
         x = np.arange(len(labels))  # the label locations
