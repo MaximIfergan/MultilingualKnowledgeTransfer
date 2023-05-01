@@ -218,8 +218,10 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
 
     # Loading model and tokenizer:
     CONSOLE.log(f"""[Model]: Loading {model_params["MODEL"]}""")  # STDOUT logger
-    tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
-    model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
+    # tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
+    # model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
+    tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"])
+    model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"])
     model = model.to(DEVICE)
     CONSOLE.log(f"""[Model]: Loading Completed""")  # STDOUT logger
 
