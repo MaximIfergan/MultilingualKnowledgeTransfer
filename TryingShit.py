@@ -1,12 +1,12 @@
-# import json
-# import re
-# import Data.DataPreprocessing as DataPreprocessing
-# import jsonlines
-# import pandas as pd
-# import spacy
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import pickle
+import json
+import re
+import Data.DataPreprocessing as DataPreprocessing
+import jsonlines
+import pandas as pd
+import spacy
+import numpy as np
+import matplotlib.pyplot as plt
+import pickle
 
 
 def print_title(title):
@@ -15,7 +15,7 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-
+print(np.array([1, 1, 1]))
 # print_title("Fix entity2pv dict:")
 
 # import matplotlib as mpl
