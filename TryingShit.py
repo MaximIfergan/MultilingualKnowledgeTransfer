@@ -1,9 +1,10 @@
 import json
 import re
+import torch
 import Data.DataPreprocessing as DataPreprocessing
 import jsonlines
 import pandas as pd
-import spacy
+# import spacy
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
@@ -15,15 +16,13 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
+print(torch.cuda.is_available())
 print(np.array([1, 1, 1]))
-# print_title("Fix entity2pv dict:")
+DEVICE = 'cuda'
+a = torch.Tensor([1, 2, 3])
+a.to(DEVICE)
 
-# import matplotlib as mpl
-# mpl.use('TkAgg')  # !IMPORTANT
-# x = np.array([1, 2, 4, 8, 9, 17])
-# plt.hist(x, 3)
-# plt.show()
-print("Ok")
+
 # # ==============================      Fix entity2pv dict:      ==============================
 #
 # with open("EntityLinking/FinetuningDatasets/Results/entity2pv.pkl", "rb") as fp:
