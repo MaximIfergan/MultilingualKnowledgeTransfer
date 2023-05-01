@@ -4,7 +4,7 @@ import torch
 import Data.DataPreprocessing as DataPreprocessing
 import jsonlines
 import pandas as pd
-# import spacy
+import spacy
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
