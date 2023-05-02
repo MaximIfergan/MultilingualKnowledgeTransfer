@@ -287,7 +287,7 @@ def main():
         "MODEL_DIR": "google/mt5-base",
         "TRAIN_BATCH_SIZE": 8,
         "VALID_BATCH_SIZE": 8,
-        "TRAIN_EPOCHS": 6,
+        "TRAIN_EPOCHS": 4,
         "LEARNING_RATE": 1e-4,
         "MAX_SOURCE_TEXT_LENGTH": 396,
         "MAX_TARGET_TEXT_LENGTH": 32,
