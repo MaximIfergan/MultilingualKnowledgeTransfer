@@ -90,6 +90,7 @@ def validate(epoch, tokenizer, model, loader):
     loss = loss / step
     CONSOLE.print(f"= Epoch: {epoch:2d} Validation Loss: {loss:.4f}\n")
     wandb.log({"Validation Loss": loss})
+    return loss
 
 
 def evaluate(tokenizer, model, loader):
@@ -250,10 +251,16 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     # Init optimizer:
     optimizer = torch.optim.Adam(params=model.parameters(), lr=model_params["LEARNING_RATE"])
 
+    max_loss = float("inf")
+
     # Training loop:
     for epoch in range(model_params["TRAIN_EPOCHS"]):
         train(epoch, tokenizer, model, training_loader, optimizer)
-        validate(epoch, tokenizer, model, val_loader)
+        loss = validate(epoch, tokenizer, model, val_loader)
+        if loss < max_loss and epoch != (model_params["TRAIN_EPOCHS"] - 1):
+            max_loss = loss
+            path = os.path.join(output_dir, f"model-epoch-{epoch}")
+            model.save_pretrained(path)
     CONSOLE.log(f"[Fine-tuning]: Completed.")
 
     # Save model:
@@ -280,7 +287,7 @@ def main():
         "MODEL_DIR": "google/mt5-base",
         "TRAIN_BATCH_SIZE": 8,
         "VALID_BATCH_SIZE": 8,
-        "TRAIN_EPOCHS": 4,
+        "TRAIN_EPOCHS": 6,
         "LEARNING_RATE": 1e-4,
         "MAX_SOURCE_TEXT_LENGTH": 396,
         "MAX_TARGET_TEXT_LENGTH": 32,
@@ -289,10 +296,13 @@ def main():
 
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1).iloc[:80, :]
 
+    output_dir = "Model/SavedModels/mT5-base"
+    os.chdir(output_dir)
+
     MT5Trainer(
         dataframe=df,
         source_text="Question",
         target_text="Answer",
         model_params=model_params,
-        output_dir="Model/SavedModels",
+        output_dir=output_dir,
     )

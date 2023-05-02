@@ -12,4 +12,6 @@ jsonlines~=3.1.0
 pywikibot~=7.7.3
 nltk~=3.8.1
 tqdm~=4.64.1
-Wikidata==0.7.0
+Wikidata==0.7.0pip
+python -m spacy download en_core_web_sm
+python -m nltk.downloader stopwords
