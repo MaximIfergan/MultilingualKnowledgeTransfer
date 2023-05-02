@@ -297,7 +297,7 @@ def main():
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1).iloc[:80, :]
 
     output_dir = "Model/SavedModels/mT5-base"
-    os.chdir(output_dir)
+    os.makedirs(output_dir)
 
     MT5Trainer(
         dataframe=df,
