@@ -294,7 +294,7 @@ def main():
         "SEED": 18,
     }
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1).iloc[:80, :]
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
 
     output_dir = "Model/SavedModels/mT5-base"
     os.makedirs(output_dir)
