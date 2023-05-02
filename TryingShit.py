@@ -1,6 +1,6 @@
 # import json
 # import re
-import torch
+# import torch
 # import Data.DataPreprocessing as DataPreprocessing
 # import jsonlines
 # import pandas as pd
@@ -8,6 +8,8 @@ import torch
 import numpy as np
 # import matplotlib.pyplot as plt
 # import pickle
+import tensorflow as tf
+
 
 
 def print_title(title):
@@ -16,11 +18,14 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-print(torch.cuda.is_available())
-print(np.array([1, 1, 1]))
-DEVICE = 'cuda'
-a = torch.Tensor([1, 2, 3])
-a.to(DEVICE)
+# print(torch.cuda.is_available())
+# print(np.array([1, 1, 1]))
+# DEVICE = 'cuda'
+# a = torch.Tensor([1, 2, 3])
+# a.to(DEVICE)
+tensor = tf.constant([1, 2, 3, 4, 5])
+with tf.device('/GPU:0'):
+    tensor_on_gpu = tf.constant([1, 2, 3, 4, 5])
 
 
 # # ==============================      Fix entity2pv dict:      ==============================
