@@ -57,9 +57,9 @@ def train(epoch, tokenizer, model, loader, optimizer):
         loss = outputs.loss
 
         # Update Loggers:
-        if _ % 500 == 0:
+        if _ % 1000 == 0:
             CONSOLE.print(f"= Epoch: {epoch:2d}  = Step: {_:5d}  = Loss: {loss.item():.4f}")
-        if _ % 250 == 0:
+        if _ % 500 == 0:
             wandb.log({"Training Loss": loss.item()})
 
         # Update Model weighs:
