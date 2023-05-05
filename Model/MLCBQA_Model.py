@@ -282,27 +282,38 @@ def main():
 
     # After training path: "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/"
 
-    model_params = {
-        "MODEL": "mt5-base",
-        "MODEL_DIR": "google/mt5-base",
-        "TRAIN_BATCH_SIZE": 8,
-        "VALID_BATCH_SIZE": 8,
-        "TRAIN_EPOCHS": 4,
-        "LEARNING_RATE": 1e-4,
-        "MAX_SOURCE_TEXT_LENGTH": 396,
-        "MAX_TARGET_TEXT_LENGTH": 32,
-        "SEED": 18,
-    }
-
+    # model_params = {
+    #     "MODEL": "mt5-base",
+    #     "MODEL_DIR": "google/mt5-base",
+    #     "TRAIN_BATCH_SIZE": 8,
+    #     "VALID_BATCH_SIZE": 8,
+    #     "TRAIN_EPOCHS": 4,
+    #     "LEARNING_RATE": 1e-4,
+    #     "MAX_SOURCE_TEXT_LENGTH": 396,
+    #     "MAX_TARGET_TEXT_LENGTH": 32,
+    #     "SEED": 18,
+    # }
+    #
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    #
+    # output_dir = "Model/SavedModels/mT5-base"
+    # os.makedirs(output_dir)
+    #
+    # MT5Trainer(
+    #     dataframe=df,
+    #     source_text="Question",
+    #     target_text="Answer",
+    #     model_params=model_params,
+    #     output_dir=output_dir,
+    # )
 
-    output_dir = "Model/SavedModels/mT5-base"
-    os.makedirs(output_dir)
 
-    MT5Trainer(
-        dataframe=df,
-        source_text="Question",
-        target_text="Answer",
-        model_params=model_params,
-        output_dir=output_dir,
-    )
+    model = MT5ForConditionalGeneration.from_pretrained("Model/SavedModels/mT5-base")
+    tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
+    val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[["Question", "Answer"]]
+    val_set = MLCBQA_Dataset(val_dataset, tokenizer, 396, 32)
+    val_params = {"batch_size": 4, "shuffle": False, "num_workers": 0}
+    val_loader = DataLoader(val_set, **val_params)
+    predictions, actuals, f1_scores, em_scores = evaluate(tokenizer, model, val_loader)
+    final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
+    final_df.to_csv(os.path.join("Model/SavedModels/mT5-base", "predictions.csv"))

@@ -9,8 +9,8 @@ from huggingface_hub import hf_hub_download
 def main():
     # QA_Linking.main()
     # EntityStats.main()
-    # TransferStats.main()
-    MLCBQA_Model.main()
+    TransferStats.main()
+    # MLCBQA_Model.main()
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,6 @@
 # import json
 # import re
 import os
-
 import torch
 # import Data.DataPreprocessing as DataPreprocessing
 # import jsonlines
@@ -26,10 +25,12 @@ def print_title(title):
 # a = torch.Tensor([1, 2, 3])
 # a.to(DEVICE)
 
-output_dir = "Model/SavedModels"
-model = MT5ForConditionalGeneration.from_pretrained("google/mt5-small")
-path = os.path.join(output_dir, "model_files")
-model.save_pretrained(path)
+print_title("Class:")
+
+# output_dir = "Model/SavedModels"
+# model = MT5ForConditionalGeneration.from_pretrained("google/mt5-small")
+# path = os.path.join(output_dir, "model_files")
+# model.save_pretrained(path)
 
 
 # # ==============================      Fix entity2pv dict:      ==============================
