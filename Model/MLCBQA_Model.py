@@ -102,6 +102,8 @@ def evaluate(tokenizer, model, loader):
     actuals = []
     with torch.no_grad():
         for _, data in enumerate(loader, 0):
+            if _ % 1000 == 0:
+                print(_)
             y = data['target_ids'].to(DEVICE, dtype=torch.long)
             ids = data['source_ids'].to(DEVICE, dtype=torch.long)
             mask = data['source_mask'].to(DEVICE, dtype=torch.long)
@@ -123,7 +125,7 @@ def evaluate(tokenizer, model, loader):
 
     result = evaluate_metrics(actuals, predictions)
     CONSOLE.print(f"Evaluation results: Exact_match {result['exact_match']}, F1: {result['f1']}")
-    wandb.log({"Exact Match": result['exact_match'], "F1": result['f1']})
+    # wandb.log({"Exact Match": result['exact_match'], "F1": result['f1']})
     return predictions, actuals, result['f1_scores'], result['exact_match_scores']
 
 
