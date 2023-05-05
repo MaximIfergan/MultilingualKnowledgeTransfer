@@ -307,8 +307,8 @@ def main():
     #     output_dir=output_dir,
     # )
 
-
-    model = MT5ForConditionalGeneration.from_pretrained("Model/SavedModels/mT5-base")
+    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
+    model = MT5ForConditionalGeneration.from_pretrained(dir)
     tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
     val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[["Question", "Answer"]]
     val_set = MLCBQA_Dataset(val_dataset, tokenizer, 396, 32)
@@ -316,4 +316,4 @@ def main():
     val_loader = DataLoader(val_set, **val_params)
     predictions, actuals, f1_scores, em_scores = evaluate(tokenizer, model, val_loader)
     final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
-    final_df.to_csv(os.path.join("Model/SavedModels/mT5-base", "predictions.csv"))
+    final_df.to_csv(os.path.join(dir, "predictions.csv"))
