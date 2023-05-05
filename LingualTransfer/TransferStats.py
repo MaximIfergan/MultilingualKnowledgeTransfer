@@ -312,22 +312,6 @@ class TransferStats:
 
 
 def main():
-    model_predictions = "Model/SavedModels/mT5-base-4-epochs-all-langs/predictions.csv"
+    model_predictions = "Model/SavedModels/mT5-base-4-epochs-all-langs/predictions_ep_0.csv"
     ts = TransferStats(model_predictions, "mT5-base")
     ts.evaluation_pipeline()
-    # print("=== LKB1 results:")
-    # print("Mintaka:")
-    # print(ts.LKB1({"col": "Dataset", "value": "Mintaka"}))
-    # print("MKQA:")
-    # print(ts.LKB1({"col": "Dataset", "value": "MKQA"}))
-    # print("ALL:")
-    # print(ts.LKB1())
-    # print("=== LKB2 results:")
-    # print("Mintaka:")
-    # print(ts.LKB2({"col": "Dataset", "value": "Mintaka"}))
-    # print("MKQA:")
-    # print(ts.LKB2({"col": "Dataset", "value": "MKQA"}))
-    # print("ALL:")
-    # print(ts.LKB2())
-    # print(ts.get_success_average_pv())
-    # print(ts.get_success_average_pv(failure=True))

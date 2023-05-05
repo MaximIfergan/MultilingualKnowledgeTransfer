@@ -102,8 +102,8 @@ def evaluate(tokenizer, model, loader):
     actuals = []
     with torch.no_grad():
         for _, data in enumerate(loader, 0):
-            if _ % 1000 == 0:
-                print(_)
+            # if _ % 1000 == 0:
+            #     print(_)
             y = data['target_ids'].to(DEVICE, dtype=torch.long)
             ids = data['source_ids'].to(DEVICE, dtype=torch.long)
             mask = data['source_mask'].to(DEVICE, dtype=torch.long)
@@ -125,7 +125,7 @@ def evaluate(tokenizer, model, loader):
 
     result = evaluate_metrics(actuals, predictions)
     CONSOLE.print(f"Evaluation results: Exact_match {result['exact_match']}, F1: {result['f1']}")
-    # wandb.log({"Exact Match": result['exact_match'], "F1": result['f1']})
+    wandb.log({"Exact Match": result['exact_match'], "F1": result['f1']})
     return predictions, actuals, result['f1_scores'], result['exact_match_scores']
 
 
@@ -253,16 +253,16 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     # Init optimizer:
     optimizer = torch.optim.Adam(params=model.parameters(), lr=model_params["LEARNING_RATE"])
 
-    max_loss = float("inf")
+    # max_loss = float("inf")
 
     # Training loop:
     for epoch in range(model_params["TRAIN_EPOCHS"]):
         train(epoch, tokenizer, model, training_loader, optimizer)
         loss = validate(epoch, tokenizer, model, val_loader)
-        if loss < max_loss and epoch != (model_params["TRAIN_EPOCHS"] - 1):
-            max_loss = loss
-            path = os.path.join(output_dir, f"model-epoch-{epoch}")
-            model.save_pretrained(path)
+        # if loss < max_loss and epoch != (model_params["TRAIN_EPOCHS"] - 1):
+        #     max_loss = loss
+        path = os.path.join(output_dir, f"model-epoch-{epoch}")
+        model.save_pretrained(path)
     CONSOLE.log(f"[Fine-tuning]: Completed.")
 
     # Save model:
@@ -284,47 +284,48 @@ def main():
 
     # After training path: "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/"
 
-    # model_params = {
-    #     "MODEL": "mt5-base",
-    #     "MODEL_DIR": "google/mt5-base",
-    #     "TRAIN_BATCH_SIZE": 8,
-    #     "VALID_BATCH_SIZE": 8,
-    #     "TRAIN_EPOCHS": 4,
-    #     "LEARNING_RATE": 1e-4,
-    #     "MAX_SOURCE_TEXT_LENGTH": 396,
-    #     "MAX_TARGET_TEXT_LENGTH": 32,
-    #     "SEED": 18,
-    # }
-    #
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
-    #
-    # output_dir = "Model/SavedModels/mT5-base"
-    # os.makedirs(output_dir)
-    #
-    # MT5Trainer(
-    #     dataframe=df,
-    #     source_text="Question",
-    #     target_text="Answer",
-    #     model_params=model_params,
-    #     output_dir=output_dir,
-    # )
+    model_params = {
+        "MODEL": "mt5-base",
+        "MODEL_DIR": "google/mt5-large",
+        "TRAIN_BATCH_SIZE": 8,
+        "VALID_BATCH_SIZE": 8,
+        "TRAIN_EPOCHS": 4,
+        "LEARNING_RATE": 1e-4,
+        "MAX_SOURCE_TEXT_LENGTH": 396,
+        "MAX_TARGET_TEXT_LENGTH": 32,
+        "SEED": 18,
+    }
 
-    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
-    print("load model")
-    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
-    tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
-    print("finish load model")
-    print("bulid val set")
-    val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[["Question", "Answer"]]
-    val_set = MLCBQA_Dataset(val_dataset, tokenizer, 396, 32)
-    val_params = {"batch_size": 4, "shuffle": False, "num_workers": 0}
-    val_loader = DataLoader(val_set, **val_params)
-    print("finish bulid val set")
-    print("start val")
-    predictions, actuals, f1_scores, em_scores = evaluate(tokenizer, model, val_loader)
-    print("end val")
-    print("save res")
-    final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
-    final_df.to_csv(os.path.join(dir, "predictions.csv"))
-    print("end save res")
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
 
+    output_dir = "Model/SavedModels/mT5-large"
+    os.makedirs(output_dir)
+
+    MT5Trainer(
+        dataframe=df,
+        source_text="Question",
+        target_text="Answer",
+        model_params=model_params,
+        output_dir=output_dir,
+    )
+
+
+    # ===================================== eval specific epochs =====================================
+    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
+    # print("load model")
+    # model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
+    # tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
+    # print("finish load model")
+    # print("bulid val set")
+    # val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[["Question", "Answer"]]
+    # val_set = MLCBQA_Dataset(val_dataset, tokenizer, 396, 32)
+    # val_params = {"batch_size": 4, "shuffle": False, "num_workers": 0}
+    # val_loader = DataLoader(val_set, **val_params)
+    # print("finish bulid val set")
+    # print("start val")
+    # predictions, actuals, f1_scores, em_scores = evaluate(tokenizer, model, val_loader)
+    # print("end val")
+    # print("save res")
+    # final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
+    # final_df.to_csv(os.path.join(dir, "predictions.csv"))
+    # print("end save res")
