@@ -308,7 +308,7 @@ def main():
     # )
 
     dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
-    model = MT5ForConditionalGeneration.from_pretrained(dir)
+    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
     tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
     val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[["Question", "Answer"]]
     val_set = MLCBQA_Dataset(val_dataset, tokenizer, 396, 32)
