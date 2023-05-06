@@ -285,7 +285,7 @@ def main():
     # After training path: "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/"
 
     model_params = {
-        "MODEL": "mt5-base",
+        "MODEL": "mt5-large",
         "MODEL_DIR": "google/mt5-large",
         "TRAIN_BATCH_SIZE": 6,
         "VALID_BATCH_SIZE": 6,
