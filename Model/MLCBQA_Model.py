@@ -296,7 +296,11 @@ def main():
         "SEED": 18,
     }
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
+    # === For checking training pipeline ===
+    # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
+
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+
 
     output_dir = "Model/SavedModels/mT5-large"
     os.makedirs(output_dir)
