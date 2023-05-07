@@ -243,8 +243,8 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     val_set = MLCBQA_Dataset(val_dataset, tokenizer, model_params["MAX_SOURCE_TEXT_LENGTH"],
                              model_params["MAX_TARGET_TEXT_LENGTH"])
 
-    train_params = {"batch_size": model_params["TRAIN_BATCH_SIZE"], "shuffle": True, "num_workers": 0}
-    val_params = {"batch_size": model_params["VALID_BATCH_SIZE"], "shuffle": False, "num_workers": 0}
+    train_params = {"batch_size": model_params["TRAIN_BATCH_SIZE"], "shuffle": True, "num_workers": 4}
+    val_params = {"batch_size": model_params["VALID_BATCH_SIZE"], "shuffle": False, "num_workers": 4}
     training_loader = DataLoader(training_set, **train_params)
     val_loader = DataLoader(val_set, **val_params)
     CONSOLE.log(f"[Dataset]: Building Completed.")
@@ -299,10 +299,10 @@ def main():
     # === For checking training pipeline ===
     # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:160]
 
 
-    output_dir = "Model/SavedModels/mT5-large"
+    output_dir = "Model/SavedModels/mT5-large-try-workers"
     os.makedirs(output_dir)
 
     MT5Trainer(
