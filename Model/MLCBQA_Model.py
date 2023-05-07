@@ -223,7 +223,8 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.log(f"""[Model]: Loading {model_params["MODEL"]}""")  # STDOUT logger
     # tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
     # model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
-    tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"])
+    tokenizer = MT5Tokenizer.from_pretrained("google/mt5-large")  # TODO delete
+    # tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"])
     model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"])
     model = model.to(DEVICE)
     CONSOLE.log(f"""[Model]: Loading Completed""")  # STDOUT logger
@@ -261,7 +262,7 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
         loss = validate(epoch, tokenizer, model, val_loader)
         # if loss < max_loss and epoch != (model_params["TRAIN_EPOCHS"] - 1):
         #     max_loss = loss
-        path = os.path.join(output_dir, f"model-epoch-{epoch}")
+        path = os.path.join(output_dir, f"model-epoch-{epoch + 1}")
         model.save_pretrained(path)
     CONSOLE.log(f"[Fine-tuning]: Completed.")
 
