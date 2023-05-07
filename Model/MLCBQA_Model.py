@@ -286,10 +286,10 @@ def main():
 
     model_params = {
         "MODEL": "mt5-large",
-        "MODEL_DIR": "google/mt5-large",
+        "MODEL_DIR": "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-large/model-epoch-0",
         "TRAIN_BATCH_SIZE": 6,
         "VALID_BATCH_SIZE": 6,
-        "TRAIN_EPOCHS": 4,
+        "TRAIN_EPOCHS": 3,
         "LEARNING_RATE": 1e-4,
         "MAX_SOURCE_TEXT_LENGTH": 396,
         "MAX_TARGET_TEXT_LENGTH": 32,
@@ -299,10 +299,10 @@ def main():
     # === For checking training pipeline ===
     # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:160]
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
 
 
-    output_dir = "Model/SavedModels/mT5-large-try-workers"
+    output_dir = "Model/SavedModels/mT5-large-continue"
     os.makedirs(output_dir)
 
     MT5Trainer(
