@@ -223,8 +223,7 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.log(f"""[Model]: Loading {model_params["MODEL"]}""")  # STDOUT logger
     # tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
     # model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"], cache_dir=CACHE_DIR)
-    tokenizer = MT5Tokenizer.from_pretrained("google/mt5-large")  # TODO delete
-    # tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"])
+    tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"])
     model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"])
     model = model.to(DEVICE)
     CONSOLE.log(f"""[Model]: Loading Completed""")  # STDOUT logger
@@ -286,8 +285,8 @@ def main():
     # After training path: "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/"
 
     model_params = {
-        "MODEL": "mt5-large",
-        "MODEL_DIR": "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-large/model-epoch-0",
+        "MODEL": "mt5-xl",
+        "MODEL_DIR": "google/mt5-xl",
         "TRAIN_BATCH_SIZE": 6,
         "VALID_BATCH_SIZE": 6,
         "TRAIN_EPOCHS": 3,
@@ -300,10 +299,10 @@ def main():
     # === For checking training pipeline ===
     # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:160]
 
 
-    output_dir = "Model/SavedModels/mT5-large-continue"
+    output_dir = "Model/SavedModels/mT5-xl"
     os.makedirs(output_dir)
 
     MT5Trainer(

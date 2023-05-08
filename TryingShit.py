@@ -25,8 +25,7 @@ def print_title(title):
 # a = torch.Tensor([1, 2, 3])
 # a.to(DEVICE)
 
-print_title("Class:")
-
+print_title("Global functions:")
 # output_dir = "Model/SavedModels"
 # model = MT5ForConditionalGeneration.from_pretrained("google/mt5-small")
 # path = os.path.join(output_dir, "model_files")
