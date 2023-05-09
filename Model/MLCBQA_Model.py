@@ -289,8 +289,8 @@ def main():
     model_params = {
         "MODEL": "mt5-xl",
         "MODEL_DIR": "google/mt5-xl",
-        "TRAIN_BATCH_SIZE": 3,
-        "VALID_BATCH_SIZE": 3,
+        "TRAIN_BATCH_SIZE": 2,
+        "VALID_BATCH_SIZE": 2,
         "TRAIN_EPOCHS": 2,
         "LEARNING_RATE": 1e-4,
         "MAX_SOURCE_TEXT_LENGTH": 396,
