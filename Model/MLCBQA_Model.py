@@ -226,6 +226,8 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     tokenizer = MT5Tokenizer.from_pretrained(model_params["MODEL_DIR"])
     model = MT5ForConditionalGeneration.from_pretrained(model_params["MODEL_DIR"])
     model = model.to(DEVICE)
+    CONSOLE.log(f"""[Model]: Model parameters:""")
+    CONSOLE.log(model_params)
     CONSOLE.log(f"""[Model]: Loading Completed""")  # STDOUT logger
 
     # Building dataset:
