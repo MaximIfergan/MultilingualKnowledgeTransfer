@@ -614,7 +614,7 @@ def main():
 
 
 def separate_dataset_entities_linking():
-    df = pd.read_csv("Data/Datasets/PreprocessDataset.csv")
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetIntersecet.csv")
     NQentitiesPath = "NQ_Linked_Entities.json"
     MKQAentitiesPath = "MKQA_Linked_Entities.json"
     with open(NQentitiesPath, 'w', encoding="utf8") as NQoutput, open(MKQAentitiesPath, 'w',

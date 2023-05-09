@@ -111,7 +111,7 @@ class DataPreprocessing:
         all_rows = mkqa_all + nq_train + mintaka_train + nq_dev + mintaka_dev
         self.data = pd.DataFrame(all_rows)
         self.data = self.data.drop_duplicates(subset=["Id", "Language"])
-        # self.data.to_csv('Datasets/PreprocessDataset.csv', encoding='utf-8')
+        # self.data.to_csv('Datasets/PreprocessDatasetIntersecet.csv', encoding='utf-8')
 
     def preprocess_mkqa(self, path, data_type):
         # Get data from file

@@ -15,7 +15,6 @@ import sys
 import pickle
 import re
 import EntityLinking.FinetuningDatasets.EntityStats as EntityStats
-# import matplotlib as mpl
 # mpl.use('TkAgg')  # !IMPORTANT
 
 # ===============================      Global Variables:      ===============================
@@ -106,6 +105,7 @@ def annotate_heatmap(im, data=None, textcolors=("black", "white"), threshold=Non
 
 
 class TransferStats:
+    """ this class produce statistics analysis on the success of the model on the different languages """
 
     def __init__(self, model_predictions, exp_name, id2entities_path=ID2ENTITIES_PATH, entity2pv_path=ENTITY2PV_PATH,
                  data_path=DATASET_PATH):
@@ -122,21 +122,29 @@ class TransferStats:
             self.entity2pv = pickle.load(fp)
 
     def evaluation_pipeline(self):
+        """ runs the hole evaluation on the predictions """
         self.plot_results_by_dataset()
         self.plot_results_by_type()
         self.plot_results_by_language()
+        self.plot_LKB_by_dataset(1)
+        self.plot_LKB_by_dataset(2)
+        self.plot_LKB_by_type(1)
+        self.plot_LKB_by_type(2)
         self.plot_number_of_languages_per_question_by_languages("Mintaka")
         self.plot_number_of_languages_per_question_by_languages("MKQA")
         self.plot_number_of_languages_per_question_by_type("Mintaka")
         self.plot_number_of_languages_per_question_by_type("MKQA")
         self.plot_languages_relation_performance_mat("Mintaka")
         self.plot_languages_relation_performance_mat("MKQA")
-        self.plot_LKB_by_dataset(1)
-        self.plot_LKB_by_dataset(2)
-        self.plot_LKB_by_type(1)
-        self.plot_LKB_by_type(2)
 
     def LKB1(self, filter_dataset=None):
+        """
+        LKB1 on the predictions
+        :param filter_dataset: a python dic with in shape of {"col": {}, "value": {}} to filter the dataframe before
+               calculating.
+        :return: LKB1
+        """
+
         df = self.results
         if filter_dataset:
             df = df[df[filter_dataset["col"]] == filter_dataset["value"]]
@@ -145,6 +153,12 @@ class TransferStats:
         return round(only_correct_answers.shape[0] / (len(correct_ids) * len(df["Language"].unique())), 3)
 
     def LKB2(self, filter_dataset=None):
+        """
+        LKB2 on the predictions
+        :param filter_dataset: a python dic with in shape of {"col": {}, "value": {}} to filter the dataframe before
+               calculating.
+        :return: LKB2
+        """
         df = self.results
         if filter_dataset:
             df = df[df[filter_dataset["col"]] == filter_dataset["value"]]
@@ -157,6 +171,7 @@ class TransferStats:
         return round(num_of_question_that_are_correct_in_all_lang / len(correct_ids), 3)
 
     def get_success_average_pv(self, failure=False):
+        # TODO fix this function to be on a specific dataset
         if failure:
             df = self.results[self.results['F1'] < F1_SUCCESS]
         else:
@@ -197,6 +212,7 @@ class TransferStats:
         return average_dict
 
     def plot_LKB_by_dataset(self, lkb_type=1):
+        """ plot LKB {1/2} by dataset """
         lkb = self.LKB1 if lkb_type == 1 else self.LKB2
         datasets = list(self.results["Dataset"].unique())
         datasets.remove("NQ")
@@ -211,6 +227,7 @@ class TransferStats:
         plt.show()
 
     def plot_LKB_by_type(self, lkb_type=1):
+        """ plot LKB {1/2} by type """
         lkb = self.LKB1 if lkb_type == 1 else self.LKB2
         types = list(self.results["Type"].unique())
         types.remove("nq")
@@ -229,6 +246,7 @@ class TransferStats:
         plt.show()
 
     def plot_results_by_language(self):
+        """ plots the accuracy by language """
         df = self.results[self.results["Dataset"] != "NQ"]
         df = df.groupby(["Language"])["F1", "EM"].mean() * 100
         labels = list(df.axes[0])
@@ -256,6 +274,7 @@ class TransferStats:
         plt.show()
 
     def plot_results_by_dataset(self):
+        """ plots the accuracy by datasets """
         all = self.results[["F1", "EM"]].mean() * 100
         df = self.results.groupby(["Dataset"])["F1", "EM"].mean() * 100
         labels = ["All"] + list(df.axes[0])
@@ -283,6 +302,7 @@ class TransferStats:
         plt.show()
 
     def plot_results_by_type(self):
+        """ plots the accuracy by type """
         df = self.results[self.results["Dataset"] != "NQ"]
         df = df.groupby(["Type"])["F1", "EM"].mean() * 100
         labels = list(df.axes[0])
@@ -310,7 +330,8 @@ class TransferStats:
         plt.show()
 
     def plot_number_of_languages_per_question_by_languages(self, dataset):
-
+        """ plots a histogram of the correct questions histogram by the number of correct answers in different languages
+            showing for each language proportion in the bar"""
         df = self.results.loc[self.results['Dataset'] == dataset]
         langs = list(df["Language"].unique())
 
@@ -343,6 +364,8 @@ class TransferStats:
         plt.show()
 
     def plot_number_of_languages_per_question_by_type(self, dataset):
+        """ plots a histogram of the correct questions histogram by the number of correct answers in different languages
+            showing for each type of QA proportion in the bar"""
         df = self.results.loc[self.results['Dataset'] == dataset]
         df = df.loc[df['F1'] > F1_SUCCESS]  # only success answers
         langs = list(df["Language"].unique())
@@ -375,6 +398,7 @@ class TransferStats:
         plt.show()
 
     def plot_types_distribution_for_evaluation_set(self, dataset):
+        # TODO test this function!
         df = self.results.loc[self.results['Dataset'] == dataset]
         df["count"] = 1
         df = df.groupby(["Type"])["count"].sum() / len(DataPreprocessing.FINETUNING_LANGS_INTERSEC)
@@ -395,6 +419,8 @@ class TransferStats:
         plt.show()
 
     def plot_languages_relation_performance_mat(self, dataset):
+        """ plots a heat matrix of the proportion of the success of each language from the QA that was answer correct
+            in a different language """
         df = self.results.loc[self.results['Dataset'] == dataset]
         df = df.loc[df['F1'] > F1_SUCCESS]  # only success answers
         ids = list(df["Id"].unique())
