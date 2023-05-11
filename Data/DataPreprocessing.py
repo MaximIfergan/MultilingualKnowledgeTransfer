@@ -228,4 +228,4 @@ if __name__ == "__main__":
     dp = DataPreprocessing()
     dp.preprocess()
     dp.print_dataset_details()
-    dp.data.to_csv("Datasets/PreprocessDatasetAllLangs.csv", encoding='utf-8')  # Save the dataset
+    # dp.data.to_csv("Datasets/PreprocessDatasetAllLangs.csv", encoding='utf-8')  # Save the dataset

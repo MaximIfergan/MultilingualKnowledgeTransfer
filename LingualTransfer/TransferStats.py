@@ -446,6 +446,6 @@ class TransferStats:
 
 
 def main():
-    model_predictions = "Model/SavedModels/mT5-large-4-epochs/predictions.csv"
-    ts = TransferStats(model_predictions, "mT5-large")
+    model_predictions = "Model/SavedModels/mT5-base-4-epochs-all-langs/predictions.csv"
+    ts = TransferStats(model_predictions, "mT5-base")
     ts.evaluation_pipeline()
