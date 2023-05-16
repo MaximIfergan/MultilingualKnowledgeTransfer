@@ -304,7 +304,7 @@ def main():
     # === For checking training pipeline ===
     # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAnswerAll.csv").sample(frac=1)[:160]
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAnswerAll.csv")
     output_dir = "Model/SavedModels/mT5-base-all-answers"
     os.makedirs(output_dir)
 
