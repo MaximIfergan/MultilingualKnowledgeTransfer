@@ -7,7 +7,7 @@ class MLCBQA_Dataset(Dataset):
     Multilingual close book question answering dataset
     """
 
-    def __init__(self, dataframe, tokenizer, source_len=396, target_len=32):
+    def __init__(self, dataframe, tokenizer, source_len, target_len, source_col, target_col):
         """
         Initializes a Dataset class
 
@@ -23,8 +23,8 @@ class MLCBQA_Dataset(Dataset):
         self.data = dataframe
         self.source_len = source_len
         self.summ_len = target_len
-        self.target_text = self.data['Answer']
-        self.source_text = self.data['Question']
+        self.target_text = self.data[target_col]
+        self.source_text = self.data[source_col]
 
     def __len__(self):
         """returns the length of dataset"""

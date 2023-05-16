@@ -240,10 +240,10 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.print(f"TRAIN Dataset: {train_dataset.shape}")
     CONSOLE.print(f"TEST Dataset: {val_dataset.shape}\n")
 
-    training_set = MLCBQA_Dataset(train_dataset, tokenizer, model_params["MAX_SOURCE_TEXT_LENGTH"],
-                                  model_params["MAX_TARGET_TEXT_LENGTH"])
-    val_set = MLCBQA_Dataset(val_dataset, tokenizer, model_params["MAX_SOURCE_TEXT_LENGTH"],
-                             model_params["MAX_TARGET_TEXT_LENGTH"])
+    training_set = MLCBQA_Dataset(train_dataset, tokenizer, model_params['MAX_SOURCE_TEXT_LENGTH'],
+                                  model_params['MAX_TARGET_TEXT_LENGTH'], source_text, target_text)
+    val_set = MLCBQA_Dataset(val_dataset, tokenizer, model_params['MAX_SOURCE_TEXT_LENGTH'],
+                                  model_params['MAX_TARGET_TEXT_LENGTH'], source_text, target_text)
 
     train_params = {"batch_size": model_params["TRAIN_BATCH_SIZE"], "shuffle": True, "num_workers": 4}
     val_params = {"batch_size": model_params["VALID_BATCH_SIZE"], "shuffle": False, "num_workers": 4}
