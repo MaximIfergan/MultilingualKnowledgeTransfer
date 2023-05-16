@@ -287,33 +287,52 @@ def main():
     # After training path: "/cs/labs/oabend/maximifergan/MKT/SavedModels/mT5-base-2-epochs/model_files/"
 
     model_params = {
-        "MODEL": "mt5-xl",
-        "MODEL_DIR": "google/mt5-xl",
-        "TRAIN_BATCH_SIZE": 2,
-        "VALID_BATCH_SIZE": 2,
-        "TRAIN_EPOCHS": 2,
+        "MODEL": "mt5-base",
+        "MODEL_DIR": "google/mt5-base",
+        "TRAIN_BATCH_SIZE": 8,
+        "VALID_BATCH_SIZE": 8,
+        "TRAIN_EPOCHS": 6,
         "LEARNING_RATE": 1e-4,
-        "MAX_SOURCE_TEXT_LENGTH": 396,
-        "MAX_TARGET_TEXT_LENGTH": 32,
+        "MAX_SOURCE_TEXT_LENGTH": 90,
+        "MAX_TARGET_TEXT_LENGTH": 312,
         "SEED": 18,
     }
+
+    # old MAX_SOURCE_TEXT_LENGTH : 396
+    # old MAX_TARGET_TEXT_LENGTH : 32
 
     # === For checking training pipeline ===
     # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:80]
 
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv").sample(frac=1)[:160]
-
-    output_dir = "Model/SavedModels/mT5-xl"
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAnswerAll.csv")
+    output_dir = "Model/SavedModels/mT5-base-all-answers"
     os.makedirs(output_dir)
 
     MT5Trainer(
         dataframe=df,
         source_text="Question",
-        target_text="Answer",
+        target_text="answer_all",
         model_params=model_params,
         output_dir=output_dir,
     )
 
+
+    # ========================= Check TEXT_LENGTH of dataset: =========================
+    # df = pd.read_csv("Data/Datasets/PreprocessDatasetAnswerAll.csv")
+    # tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
+    # source_max = 0
+    # target_max = 0
+    # for index, row in df.iterrows():
+    #     s = tokenizer.batch_encode_plus(
+    #         [str(row["Question"])],
+    #         return_tensors="pt")
+    #     t = tokenizer.batch_encode_plus(
+    #         [str(row["answer_all"])],
+    #         return_tensors="pt")
+    #     source_max = source_max if s["input_ids"].squeeze().shape[0] <= source_max else s["input_ids"].squeeze().shape[0]
+    #     target_max = target_max if t["input_ids"].squeeze().shape[0] <= target_max else t["input_ids"].squeeze().shape[0]
+    # print(source_max)
+    # print(target_max)
 
     # ===================================== eval specific epochs =====================================
     # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"

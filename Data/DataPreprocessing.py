@@ -7,6 +7,9 @@ import gzip
 
 FINETUNING_LANGS_INTERSEC = ["en", "ar", "de", "ja", "pt", "es", "it", "fr"]
 
+CODE2LANG = {"en":"English", "ar": "Arabic", "de":"German", "ja":"Japanese", "pt":"Portuguese",
+             "es":"Spanish", "it":"Italian", "fr":"French", "hi":"Hindi"}
+
 MINTAKA_LANGS = ["en", "ar", "de", "ja", "pt", "es", "it", "fr", "hi"]
 
 MKQA_LANGS = ["en", "ar", "da", "de", "es", "fi", "fr", "he", "hu", "it", "ja", "km", "ko", "ms", "nl", "no",
@@ -87,6 +90,25 @@ MINTAKA_TEST_PATH = "Datasets/Mintaka/mintaka_test.json"
 #             if count % 5000 == 0:
 #                 print(count)
 
+def assemble_answers_in_all_languages(data):
+    ids = list(data.loc[data["Dataset"] != "NQ"]["Id"].unique())
+    data["answer_all"] = data["Answer"]
+    count = 0
+    print(f"number of ids: {len(ids)}")
+    for id in ids:
+        if count % 1000 == 0:
+            print(count)
+        new_answer = ""
+        tmp = data.loc[data["Id"] == id]
+        id_langs = set(tmp["Language"])
+        for lang in FINETUNING_LANGS_INTERSEC:
+            if lang not in id_langs:
+                new_answer += CODE2LANG[lang] + ": " + "None" + " "
+                continue
+            new_answer += (CODE2LANG[lang] + ": " + str(tmp.loc[tmp["Language"] == lang]["Answer"].item())) + " "
+        data.loc[data["Id"] == id, "answer_all"] = new_answer
+        count += 1
+    return data
 
 # ==================================      Class Code:      ==================================
 
@@ -225,7 +247,12 @@ class DataPreprocessing:
 
 
 if __name__ == "__main__":
-    dp = DataPreprocessing()
-    dp.preprocess()
-    dp.print_dataset_details()
+    # dp = DataPreprocessing()
+    # dp.preprocess()
+    # dp.print_dataset_details()
     # dp.data.to_csv("Datasets/PreprocessDatasetAllLangs.csv", encoding='utf-8')  # Save the dataset
+    df = pd.read_csv('Datasets/PreprocessDatasetAnswerAll2.csv')
+    # res = assemble_answers_in_all_languages(df)
+    # res.to_csv('Datasets/PreprocessDatasetAnswerAll.csv')
+    df.loc[df["Dataset"] != "NQ", "Question"] = "All language: " + df.loc[df["Dataset"] != "NQ", "Question"]
+    df.to_csv('Datasets/PreprocessDatasetAnswerAll.csv')

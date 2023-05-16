@@ -223,7 +223,7 @@ class TransferStats:
         fig, ax = plt.subplots()
         ax.bar(datasets, values)
         ax.set_ylabel(f"LKB {lkb_type}")
-        ax.set_title(f"LKB {lkb_type} Results by Dataset {self.exp_name}")
+        ax.set_title(f"LKB {lkb_type} Results by Dataset {self.models_names}")
         plt.show()
 
     def plot_LKB_by_type(self, lkb_type=1):
@@ -241,7 +241,7 @@ class TransferStats:
         ax.bar(types, values)
         ax.set_xticks(types, types, rotation=45, size="small")
         ax.set_ylabel(f"LKB {lkb_type}")
-        ax.set_title(f"LKB {lkb_type} Results by Type {self.exp_name}")
+        ax.set_title(f"LKB {lkb_type} Results by Type {self.models_names}")
         plt.gcf().subplots_adjust(bottom=0.2)
         plt.show()
 
@@ -262,7 +262,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Scores')
-        ax.set_title(f'Scores By Language {self.exp_name}')
+        ax.set_title(f'Scores By Language {self.models_names}')
         ax.set_xticks(x, labels)
         ax.legend()
 
@@ -290,7 +290,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Scores')
-        ax.set_title(f'Scores By Dataset {self.exp_name}')
+        ax.set_title(f'Scores By Dataset {self.models_names}')
         ax.set_xticks(x, labels)
         ax.legend()
 
@@ -318,7 +318,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Scores')
-        ax.set_title(f'Scores By Type {self.exp_name}')
+        ax.set_title(f'Scores By Type {self.models_names}')
         ax.set_xticks(x, labels, rotation=45, size="small")
         ax.legend()
 
@@ -358,7 +358,7 @@ class TransferStats:
         ax.set_xticks(list(range(1, len(langs) + 1)), list(range(1, len(langs) + 1)), size="small")
         ax.set_ylabel('# questions')
         ax.set_ylabel('# languages received correct answer')
-        ax.set_title(f'{dataset} correct questions histogram by language {self.exp_name}', fontsize=11)
+        ax.set_title(f'{dataset} correct questions histogram by language {self.models_names}', fontsize=11)
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
         fig.tight_layout()
         plt.show()
@@ -392,7 +392,7 @@ class TransferStats:
         ax.set_xticks(list(range(1, len(langs) + 1)), list(range(1, len(langs) + 1)), size="small")
         ax.set_ylabel('# questions')
         ax.set_ylabel('# languages received correct answer')
-        ax.set_title(f'{dataset} correct questions histogram {self.exp_name}', fontsize=9)
+        ax.set_title(f'{dataset} correct questions histogram {self.models_names}', fontsize=9)
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 7})
         fig.tight_layout()
         plt.show()
@@ -411,7 +411,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('# questions')
-        ax.set_title(f"Types histogram {self.exp_name}")
+        ax.set_title(f"Types histogram {self.models_names}")
         ax.set_xticks(x, labels, rotation=45, size="small")
         ax.legend()
         ax.bar_label(rects, padding=3)
@@ -440,7 +440,7 @@ class TransferStats:
         im, cbar = heatmap(np.array(result_mat), langs, langs, ax=ax,
                            cmap="YlGn", cbarlabel="(% correct answers column from correct row answers")
         texts = annotate_heatmap(im)
-        ax.set_title(f"{dataset} languages performance relation on {self.exp_name}")
+        ax.set_title(f"{dataset} languages performance relation on {self.models_names}")
         fig.tight_layout()
         plt.show()
 

@@ -9,9 +9,8 @@ from huggingface_hub import hf_hub_download
 def main():
     # QA_Linking.main()
     # EntityStats.main()
-    TransferStats.main()
-    # MLCBQA_Model.main()
+    # TransferStats.main()
+    MLCBQA_Model.main()
 
 if __name__ == "__main__":
     main()
-    # hf_hub_download(repo_id="nkandpa2/pretraining_entities", filename="wikipedia_entity_map.npz", repo_type="dataset", cache_dir="EntityLinking/PretrainingDatasets")
