@@ -101,6 +101,21 @@ def annotate_heatmap(im, data=None, textcolors=("black", "white"), threshold=Non
     return texts
 
 
+def PMF(f_res, s_res):
+    im = [0, 1]
+    total = f_res.shape[0]
+    final_res = 0
+    for i in im:
+        for j in im:
+            px = np.sum(f_res == i) / total
+            py = np.sum(s_res == j) / total
+            p_x_y = np.sum(np.logical_and(f_res == i, s_res == j)) / (total * total)
+            if px == 0 or py == 0 or p_x_y == 0:
+                continue
+            final_res += (p_x_y * np.log(p_x_y / (py * px)))
+    return final_res
+
+
 # ====================================      Class:      ====================================
 
 
@@ -136,6 +151,7 @@ class TransferStats:
         self.plot_number_of_languages_per_question_by_type("MKQA")
         self.plot_languages_relation_performance_mat("Mintaka")
         self.plot_languages_relation_performance_mat("MKQA")
+        self.plot_pmf_mat("Mintaka")
 
     def LKB1(self, filter_dataset=None):
         """
@@ -223,7 +239,8 @@ class TransferStats:
         fig, ax = plt.subplots()
         ax.bar(datasets, values)
         ax.set_ylabel(f"LKB {lkb_type}")
-        ax.set_title(f"LKB {lkb_type} Results by Dataset {self.models_names}")
+        ax.set_title(f"LKB {lkb_type} Results by Dataset {self.exp_name}")
+        plt.ylim(0, 1)
         plt.show()
 
     def plot_LKB_by_type(self, lkb_type=1):
@@ -241,8 +258,9 @@ class TransferStats:
         ax.bar(types, values)
         ax.set_xticks(types, types, rotation=45, size="small")
         ax.set_ylabel(f"LKB {lkb_type}")
-        ax.set_title(f"LKB {lkb_type} Results by Type {self.models_names}")
+        ax.set_title(f"LKB {lkb_type} Results by Type {self.exp_name}")
         plt.gcf().subplots_adjust(bottom=0.2)
+        plt.ylim(0, 1)
         plt.show()
 
     def plot_results_by_language(self):
@@ -262,7 +280,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Scores')
-        ax.set_title(f'Scores By Language {self.models_names}')
+        ax.set_title(f'Scores By Language {self.exp_name}')
         ax.set_xticks(x, labels)
         ax.legend()
 
@@ -270,32 +288,48 @@ class TransferStats:
         ax.bar_label(rects2, padding=3)
 
         fig.tight_layout()
-
+        plt.ylim(0, 35)
         plt.show()
 
     def plot_results_by_dataset(self):
         """ plots the accuracy by datasets """
+        binary_types = ["comparative", "binary", "yesno"]
         all = self.results[["F1", "EM"]].mean() * 100
         df = self.results.groupby(["Dataset"])["F1", "EM"].mean() * 100
         labels = ["All"] + list(df.axes[0])
         f1 = [round(all["F1"], 2)] + [round(value, 2) for value in df["F1"]]
         em = [round(all["EM"], 2)] + [round(value, 2) for value in df["EM"]]
+        unique = []
+        correct_results = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
+        unique.append(len(correct_results['Id'].unique()) / len(self.results['Id'].unique()))
+        for value in list(df.axes[0]):
+            unique.append(len(correct_results.loc[(correct_results["Dataset"] == value) &
+                                                  (correct_results["Type"] != "comparative") &
+                                                  (correct_results["Type"] != "binary") &
+                                                  (correct_results["Type"] != "yesno")]['Id'].unique()) /
+                          len(self.results.loc[(self.results["Dataset"] == value) &
+                                               (self.results["Type"] != "comparative") &
+                                               (self.results["Type"] != "binary") &
+                                               (self.results["Type"] != "yesno")]['Id'].unique()))
+        unique = [round(value * 100, 2) for value in unique]
 
         x = np.arange(len(labels))  # the label locations
-        width = 0.35  # the width of the bars
+        width = 0.25  # the width of the bars
 
         fig, ax = plt.subplots()
-        rects1 = ax.bar(x - width / 2, f1, width, label='F1')
-        rects2 = ax.bar(x + width / 2, em, width, label='EM')
+        rects1 = ax.bar(x - width, f1, width, label='F1')
+        rects2 = ax.bar(x, em, width, label='EM')
+        rects3 = ax.bar(x + width, unique, width, label='Unique')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Scores')
-        ax.set_title(f'Scores By Dataset {self.models_names}')
+        ax.set_title(f'Scores By Dataset {self.exp_name}')
         ax.set_xticks(x, labels)
         ax.legend()
 
         ax.bar_label(rects1, padding=3)
         ax.bar_label(rects2, padding=3)
+        ax.bar_label(rects3, padding=3)
 
         fig.tight_layout()
 
@@ -318,7 +352,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('Scores')
-        ax.set_title(f'Scores By Type {self.models_names}')
+        ax.set_title(f'Scores By Type {self.exp_name}')
         ax.set_xticks(x, labels, rotation=45, size="small")
         ax.legend()
 
@@ -358,9 +392,10 @@ class TransferStats:
         ax.set_xticks(list(range(1, len(langs) + 1)), list(range(1, len(langs) + 1)), size="small")
         ax.set_ylabel('# questions')
         ax.set_ylabel('# languages received correct answer')
-        ax.set_title(f'{dataset} correct questions histogram by language {self.models_names}', fontsize=11)
+        ax.set_title(f'{dataset} correct questions histogram by language {self.exp_namee}', fontsize=11)
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
         fig.tight_layout()
+        # plt.ylim(0, 300)
         plt.show()
 
     def plot_number_of_languages_per_question_by_type(self, dataset):
@@ -392,9 +427,10 @@ class TransferStats:
         ax.set_xticks(list(range(1, len(langs) + 1)), list(range(1, len(langs) + 1)), size="small")
         ax.set_ylabel('# questions')
         ax.set_ylabel('# languages received correct answer')
-        ax.set_title(f'{dataset} correct questions histogram {self.models_names}', fontsize=9)
+        ax.set_title(f'{dataset} correct questions histogram {self.exp_name}', fontsize=9)
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 7})
         fig.tight_layout()
+        # plt.ylim(0, 300)
         plt.show()
 
     def plot_types_distribution_for_evaluation_set(self, dataset):
@@ -411,7 +447,7 @@ class TransferStats:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel('# questions')
-        ax.set_title(f"Types histogram {self.models_names}")
+        ax.set_title(f"Types histogram {self.exp_name}")
         ax.set_xticks(x, labels, rotation=45, size="small")
         ax.legend()
         ax.bar_label(rects, padding=3)
@@ -440,12 +476,41 @@ class TransferStats:
         im, cbar = heatmap(np.array(result_mat), langs, langs, ax=ax,
                            cmap="YlGn", cbarlabel="(% correct answers column from correct row answers")
         texts = annotate_heatmap(im)
-        ax.set_title(f"{dataset} languages performance relation on {self.models_names}")
+        ax.set_title(f"{dataset} languages performance relation on {self.exp_name}")
+        fig.tight_layout()
+        plt.show()
+
+    def plot_pmf_mat(self, dataset):
+        """ plots a heat matrix of the PMF of the sucsess of different langauges """
+        df = self.results.loc[self.results['Dataset'] == dataset]
+        df = df.loc[df['F1'] > F1_SUCCESS]  # only success answers
+        ids = list(df["Id"].unique())
+        langs = list(df["Language"].unique())
+        data = np.zeros((len(ids), len(langs)))
+        ref_mat = pd.DataFrame(data, index=ids, columns=langs)
+        for lang in langs:
+            lang_ids = list(df[df["Language"] == lang]["Id"])
+            ref_mat.loc[lang_ids, lang] = 1
+        data = np.zeros((len(langs), len(langs)))
+        result_mat = pd.DataFrame(data, index=langs, columns=langs)
+        for i in range(len(langs)):
+            for j in range(0, len(langs)):
+                if j <= i:
+                    result_mat.loc[langs[i], langs[j]] = None
+                    continue
+                result_mat.loc[langs[i], langs[j]] = PMF(np.array(ref_mat[langs[i]]), np.array(ref_mat[langs[j]])) * 1000
+        result_mat = result_mat.round(3)
+
+        fig, ax = plt.subplots()
+        im, cbar = heatmap(np.array(result_mat), langs, langs, ax=ax,
+                           cmap="YlGn", cbarlabel="PMF * 10^3")
+        texts = annotate_heatmap(im)
+        ax.set_title(f"{dataset} languages success PMF {self.exp_name}")
         fig.tight_layout()
         plt.show()
 
 
 def main():
-    model_predictions = "Model/SavedModels/mT5-base-4-epochs-all-langs/predictions.csv"
+    model_predictions = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
     ts = TransferStats(model_predictions, "mT5-base")
     ts.evaluation_pipeline()

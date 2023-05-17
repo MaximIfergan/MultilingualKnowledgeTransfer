@@ -6,7 +6,7 @@ from Data import DataPreprocessing
 
 class PredictionsStats:
 
-    def __init__(self, data_path="SavedModels/mT5-base-6-epochs-lang-intersc/validation_set_with_results.csv"):
+    def __init__(self, data_path="SavedModels/mT5-base-6-ep-inter/validation_set_with_results.csv"):
         self.data = pd.read_csv(data_path)
 
     def plot_results_by_language(self):
