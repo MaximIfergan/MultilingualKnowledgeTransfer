@@ -76,7 +76,7 @@ if __name__ == "__main__":
     # #
     # df = pd.read_csv('Datasets/PreprocessDatasetIntersecet.csv')
     # val_dataset = df[df['DataType'] == "dev"]
-    # df = pd.read_csv('SavedModels/mT5-base-6-ep-inter/predictions.csv')
+    # df = pd.read_csv('SavedModels/mT5-base-6-ep-inter/predictions_extract-bug.csv')
     # predictions = df['Generated Text'].tolist()
     # actual = df['Actual Text'].tolist()
     # result = MLCBQA_Model.evaluate_metrics(actual, predictions)

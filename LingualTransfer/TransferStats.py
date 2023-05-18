@@ -14,8 +14,10 @@ import Data.DataPreprocessing as DataPreprocessing
 import sys
 import pickle
 import re
+import os
 import EntityLinking.FinetuningDatasets.EntityStats as EntityStats
-# mpl.use('TkAgg')  # !IMPORTANT
+import Model.MLCBQA_Model as MLCBQA_Model
+
 
 # ===============================      Global Variables:      ===============================
 
@@ -26,6 +28,7 @@ ID2ENTITIES_PATH = "EntityLinking/FinetuningDatasets/Results/id2entities.pkl"
 ENTITY2PV_PATH = "EntityLinking/FinetuningDatasets/Results/entity2pv1.pkl"
 DATASET_PATH = "Data/Datasets/PreprocessDatasetAllLangs.csv"
 CLIENT = Client()
+LANGS_ALL_ANSWERS = ["English:", "Arabic:", "German:", "Japanese:", "Portuguese:", "Spanish:", "Italian:", "French:"]
 
 # ===============================      Global functions:      ===============================
 
@@ -48,8 +51,8 @@ def heatmap(data, row_labels, col_labels, ax=None,
     cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
 
     # Show all ticks and label them with the respective list entries.
-    ax.set_xticks(np.arange(data.shape[1]), labels=col_labels)
-    ax.set_yticks(np.arange(data.shape[0]), labels=row_labels)
+    ax.set_xticks(np.arange(data.shape[1]), labels=col_labels, fontsize=8)
+    ax.set_yticks(np.arange(data.shape[0]), labels=row_labels, fontsize=8)
 
     # Let the horizontal axes labeling appear on top.
     ax.tick_params(top=True, bottom=False,
@@ -97,7 +100,6 @@ def annotate_heatmap(im, data=None, textcolors=("black", "white"), threshold=Non
             kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
             text = im.axes.text(j, i, data[i, j], **kw)
             texts.append(text)
-
     return texts
 
 
@@ -116,6 +118,50 @@ def PMF(f_res, s_res):
     return final_res
 
 
+def extract_answer_in_lang(all_answers, lang):
+    l_all_answers = all_answers.split()
+    final_answer = ""
+    for i in range(len(l_all_answers)):
+        if l_all_answers[i] == (DataPreprocessing.CODE2LANG[lang] + ":"):
+            i += 1
+            while i < len(l_all_answers) and l_all_answers[i] not in LANGS_ALL_ANSWERS:
+                final_answer += (" " + l_all_answers[i])
+                i += 1
+            break
+    return final_answer
+
+
+def all_answer_to_lang_answer(predictions_path, output_dir="", data_path="Data/Datasets/PreprocessDatasetAnswerAll.csv"):
+    data = pd.read_csv(data_path)
+    data = data.loc[data['DataType'] == "dev"]
+    model_predictions = pd.read_csv(predictions_path)
+    model_predictions = list(model_predictions["Generated Text"])
+    predictions = []
+    actuals = []
+    i = 0
+    for row_index, row in data.iterrows():
+        lang = row["Language"]
+
+        # TODO delete!
+        if lang in ["ar", "ja"]:
+            i += 1
+            continue
+
+        if row["Dataset"] == "NQ":
+            actuals.append(row["Answer"])
+            predictions.append(model_predictions[i])
+            i += 1
+            continue
+        predictions.append(extract_answer_in_lang(model_predictions[i], lang))
+        actuals.append(row["Answer"])
+        i += 1
+    result = MLCBQA_Model.evaluate_metrics(actuals, predictions)
+    f1_scores, em_scores = result['f1_scores'], result['exact_match_scores']
+    em_scores = [int(element) for element in em_scores]
+    final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
+    final_df.to_csv(os.path.join(output_dir, "predictions_extract.csv"))
+
+
 # ====================================      Class:      ====================================
 
 
@@ -124,13 +170,17 @@ class TransferStats:
 
     def __init__(self, model_predictions, exp_name, id2entities_path=ID2ENTITIES_PATH, entity2pv_path=ENTITY2PV_PATH,
                  data_path=DATASET_PATH):
-        predictions = pd.read_csv(model_predictions)
+        # predictions = pd.read_csv(model_predictions)
         self.exp_name = exp_name
-        self.results = pd.read_csv(data_path)
-        self.results = self.results.loc[self.results['DataType'] == "dev"]
-        self.results["Prediction"] = list(predictions["Generated Text"])
-        self.results["F1"] = list(predictions["F1"])
-        self.results["EM"] = list(predictions["EM"])
+
+        # self.results = pd.read_csv(data_path)
+        # self.results = self.results.loc[self.results['DataType'] == "dev"]
+        # self.results["Prediction"] = list(predictions["Generated Text"])
+        # self.results["F1"] = list(predictions["F1"])
+        # self.results["EM"] = list(predictions["EM"])
+
+        self.results = pd.read_csv('Model/SavedModels/mT5-base-6-ep-inter/validation_set_with_results.csv')
+
         with open(id2entities_path, "rb") as fp:
             self.id2entities = pickle.load(fp)
         with open(entity2pv_path, "rb") as fp:
@@ -139,19 +189,20 @@ class TransferStats:
     def evaluation_pipeline(self):
         """ runs the hole evaluation on the predictions """
         self.plot_results_by_dataset()
-        self.plot_results_by_type()
-        self.plot_results_by_language()
-        self.plot_LKB_by_dataset(1)
-        self.plot_LKB_by_dataset(2)
-        self.plot_LKB_by_type(1)
-        self.plot_LKB_by_type(2)
+        # self.plot_results_by_type()
+        # self.plot_results_by_language()
+        # self.plot_LKB_by_dataset(1)
+        # self.plot_LKB_by_dataset(2)
+        # self.plot_LKB_by_type(1)
+        # self.plot_LKB_by_type(2)
         self.plot_number_of_languages_per_question_by_languages("Mintaka")
         self.plot_number_of_languages_per_question_by_languages("MKQA")
-        self.plot_number_of_languages_per_question_by_type("Mintaka")
-        self.plot_number_of_languages_per_question_by_type("MKQA")
-        self.plot_languages_relation_performance_mat("Mintaka")
-        self.plot_languages_relation_performance_mat("MKQA")
-        self.plot_pmf_mat("Mintaka")
+        # self.plot_number_of_languages_per_question_by_type("Mintaka")
+        # self.plot_number_of_languages_per_question_by_type("MKQA")
+        # self.plot_languages_relation_performance_mat("Mintaka")
+        # self.plot_languages_relation_performance_mat("MKQA")
+        # self.plot_pmf_mat("Mintaka")
+        # self.plot_pmf_mat("MKQA")
 
     def LKB1(self, filter_dataset=None):
         """
@@ -293,7 +344,6 @@ class TransferStats:
 
     def plot_results_by_dataset(self):
         """ plots the accuracy by datasets """
-        binary_types = ["comparative", "binary", "yesno"]
         all = self.results[["F1", "EM"]].mean() * 100
         df = self.results.groupby(["Dataset"])["F1", "EM"].mean() * 100
         labels = ["All"] + list(df.axes[0])
@@ -392,10 +442,10 @@ class TransferStats:
         ax.set_xticks(list(range(1, len(langs) + 1)), list(range(1, len(langs) + 1)), size="small")
         ax.set_ylabel('# questions')
         ax.set_ylabel('# languages received correct answer')
-        ax.set_title(f'{dataset} correct questions histogram by language {self.exp_namee}', fontsize=11)
+        ax.set_title(f'{dataset} correct questions histogram by language {self.exp_name}', fontsize=11)
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 8})
         fig.tight_layout()
-        # plt.ylim(0, 300)
+        # plt.ylim(0, 450)
         plt.show()
 
     def plot_number_of_languages_per_question_by_type(self, dataset):
@@ -511,6 +561,16 @@ class TransferStats:
 
 
 def main():
-    model_predictions = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
-    ts = TransferStats(model_predictions, "mT5-base")
+    # model_predictions = "Model/SavedModels/mT5-base-6-ep-all-answers/predictions_extract.csv"
+    # ts = TransferStats(model_predictions, "mT5-base+", data_path="Data/Datasets/PreprocessDatasetAnswerAll.csv")
+    # model_predictions = "Model/SavedModels/mT5-base-6-ep-inter/predictions.csv"
+    # ts = TransferStats(model_predictions, "mT5-base", data_path="Model/SavedModels/mT5-base-6-ep-inter/PreprocessDatasetOld.csv")
+    model_predictions = "Model/SavedModels/mT5-large-4-ep/predictions.csv"
+    ts = TransferStats(model_predictions, "mT5-large")
     ts.evaluation_pipeline()
+
+
+    # string = "English: John de Mol Arabic: جون دي مول German: John de Mol Japanese: ジョン デ モル Portuguese: John de Mol Spanish: John de Mol Italian: John de Mol French: John de Mol "
+    # print(extract_answer_in_lang(string, "fr"))
+
+    # all_answer_to_lang_answer("Model/SavedModels/mT5-base-6-ep-all-answers/predictions.csv")

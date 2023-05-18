@@ -276,7 +276,7 @@ def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./
     CONSOLE.log(f"[Evaluation]: Initiating Evaluation")
     predictions, actuals, f1_scores, em_scores = evaluate(tokenizer, model, val_loader)
     final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
-    final_df.to_csv(os.path.join(output_dir, "predictions.csv"))
+    final_df.to_csv(os.path.join(output_dir, "predictions_extract.csv"))
     CONSOLE.log(f"[Evaluation]: Evaluation Completed")
 
     CONSOLE.save_text(os.path.join(output_dir, "logs.txt"))
@@ -351,5 +351,5 @@ def main():
     # print("end val")
     # print("save res")
     # final_df = pd.DataFrame({"Generated Text": predictions, "Actual Text": actuals, "F1": f1_scores, "EM": em_scores})
-    # final_df.to_csv(os.path.join(dir, "predictions.csv"))
+    # final_df.to_csv(os.path.join(dir, "predictions_extract-bug.csv"))
     # print("end save res")
