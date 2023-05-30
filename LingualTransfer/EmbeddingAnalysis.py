@@ -72,8 +72,8 @@ class EmbeddingAnalysis:
         for id in ids:
             langs = list(df.loc[df["Id"] == id]["Language"].unique())
             for i in range(len(langs)):
-                lang_i_encoder_emb = self.emb_layers[str(id)][langs[i]]["encoder_hidden_states"]
-                lang_i_decoder_emb = self.emb_layers[str(id)][langs[i]]["decoder_hidden_states"]
+                lang_i_encoder_emb = mean_encoder_embedding(self.emb_layers[str(id)][langs[i]]["encoder_hidden_states"])
+                lang_i_decoder_emb = mean_decoder_embedding(self.emb_layers[str(id)][langs[i]]["decoder_hidden_states"])
                 for j in range(i + 1, len(langs)):
                     lang_j_encoder_emb = mean_encoder_embedding(self.emb_layers[str(id)][langs[j]]["encoder_hidden_states"])
                     lang_j_decoder_emb = mean_decoder_embedding(self.emb_layers[str(id)][langs[j]]["decoder_hidden_states"])
