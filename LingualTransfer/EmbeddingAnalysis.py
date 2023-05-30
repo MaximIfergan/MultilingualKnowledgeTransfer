@@ -66,16 +66,16 @@ class EmbeddingAnalysis:
         df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
         df = df.loc[df['Dataset'] != "NQ"]
         ids = list(df["Id"].unique())
-        encoder_dist = np.zeros(len(self.emb_layers[ids[0]]['en']["encoder_hidden_states"]))
-        decoder_dist = np.zeros(len(self.emb_layers[ids[0]]['en']["decoder_hidden_states"][0]))
+        encoder_dist = np.zeros(len(self.emb_layers[str(ids[0])]['en']["encoder_hidden_states"]))
+        decoder_dist = np.zeros(len(self.emb_layers[str(ids[0])]['en']["decoder_hidden_states"][0]))
         for id in ids:
             langs = list(df.loc[df["Id"] == id]["Language"].unique())
             for i in range(len(langs)):
-                lang_i_encoder_emb = self.emb_layers[id][langs[i]]["encoder_hidden_states"]
-                lang_i_decoder_emb = self.emb_layers[id][langs[i]]["decoder_hidden_states"]
+                lang_i_encoder_emb = self.emb_layers[str(id)][langs[i]]["encoder_hidden_states"]
+                lang_i_decoder_emb = self.emb_layers[str(id)][langs[i]]["decoder_hidden_states"]
                 for j in range(i + 1, len(langs)):
-                    lang_j_encoder_emb = mean_encoder_embedding(self.emb_layers[id][langs[j]]["encoder_hidden_states"])
-                    lang_j_decoder_emb = mean_decoder_embedding(self.emb_layers[id][langs[j]]["decoder_hidden_states"])
+                    lang_j_encoder_emb = mean_encoder_embedding(self.emb_layers[str(id)][langs[j]]["encoder_hidden_states"])
+                    lang_j_decoder_emb = mean_decoder_embedding(self.emb_layers[str(id)][langs[j]]["decoder_hidden_states"])
 
                     ij_encoder_dist = dist_function(lang_i_encoder_emb, lang_j_encoder_emb)
                     ij_decoder_dist = dist_function(lang_i_decoder_emb, lang_j_decoder_emb)
