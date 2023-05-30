@@ -143,9 +143,9 @@ class EmbeddingAnalysis:
         first_ids = random.choices(ids, k=50)
         second_ids = random.choices(ids, k=50)
         for first_id in first_ids:
-            first_id_lang = random.choice(self.emb_layers[first_id].keys())
+            first_id_lang = random.choice(list(self.emb_layers[first_id].keys()))
             for second_id in second_ids:
-                second_id_lang = random.choice(self.emb_layers[second_id].keys())
+                second_id_lang = random.choice(list(self.emb_layers[second_id].keys()))
                 first_encoder_emb = mean_encoder_embedding(
                     self.emb_layers[str(first_id)][first_id_lang]["encoder_hidden_states"])
                 first_decoder_emb = mean_decoder_embedding(
