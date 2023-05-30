@@ -7,7 +7,8 @@ class MLCBQA_Dataset(Dataset):
     Multilingual close book question answering dataset
     """
 
-    def __init__(self, dataframe, tokenizer, source_len, target_len, source_col, target_col):
+    def __init__(self, dataframe, tokenizer, source_len, target_len, source_col, target_col,
+                 pad_to_max_length=True):
         """
         Initializes a Dataset class
 
@@ -25,6 +26,7 @@ class MLCBQA_Dataset(Dataset):
         self.summ_len = target_len
         self.target_text = self.data[target_col]
         self.source_text = self.data[source_col]
+        self.pad_to_max_length = pad_to_max_length
 
     def __len__(self):
         """returns the length of dataset"""
@@ -32,8 +34,8 @@ class MLCBQA_Dataset(Dataset):
 
     def __getitem__(self, index):
         """return the input ids, attention masks and target ids"""
-        source_text = str(self.source_text[index])
-        target_text = str(self.target_text[index])
+        source_text = str(self.source_text.iloc[index])
+        target_text = str(self.target_text.iloc[index])
 
         # cleaning data so as to ensure data is in string type
         source_text = " ".join(source_text.split())
@@ -42,17 +44,15 @@ class MLCBQA_Dataset(Dataset):
         source = self.tokenizer.batch_encode_plus(
             [source_text],
             max_length=self.source_len,
-            pad_to_max_length=True,
+            pad_to_max_length=self.pad_to_max_length,
             truncation=True,
-            padding="max_length",
             return_tensors="pt",
         )
         target = self.tokenizer.batch_encode_plus(
             [target_text],
             max_length=self.summ_len,
-            pad_to_max_length=True,
+            pad_to_max_length=self.pad_to_max_length,
             truncation=True,
-            padding="max_length",
             return_tensors="pt",
         )
 
@@ -64,4 +64,5 @@ class MLCBQA_Dataset(Dataset):
         return {
             "source_ids": source_ids, "source_mask": source_mask,
             "target_ids": target_ids, "target_ids_y": target_ids,
+            "id": str(self.data.iloc[index]["Id"]), "lang": str(self.data.iloc[index]["Language"])
         }
