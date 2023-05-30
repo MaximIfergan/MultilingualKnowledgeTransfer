@@ -218,8 +218,8 @@ def save_embedding_layers(tokenizer, model, dataset, source_col, target_col, out
             if count % 10 == 0:
                 print(f"evaluation at: {round(100 * count / dataset_size)}%")
 
-            ids = data['source_ids'].to(DEVICE, dtype=torch.long)
-            mask = data['source_mask'].to(DEVICE, dtype=torch.long)
+            ids = data['source_ids'].to(DEVICE, dtype=torch.long).to(DEVICE)
+            mask = data['source_mask'].to(DEVICE, dtype=torch.long).to(DEVICE)
 
             out = model.generate(
                 input_ids=ids,
@@ -404,11 +404,10 @@ def main():
     # print("end save res")
 
     # =========================      Debug saving the embeddings:      =========================
-    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
-    dir = "google/mt5-small"
-    model_name = "mt5-small"
+    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
+    model_name = "mT5-base"
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
-    model = MT5ForConditionalGeneration.from_pretrained(dir)
+    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
     tokenizer = MT5Tokenizer.from_pretrained(dir)
     val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[:50]
-    save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'embedding_layers_{model_name}.pkl')
+    save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}.pkl')
