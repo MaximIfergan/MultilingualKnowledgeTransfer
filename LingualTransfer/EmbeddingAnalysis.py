@@ -102,7 +102,7 @@ class EmbeddingAnalysis:
 
         for id in ids:
             for lang in langs:
-                if len(langs[lang]) < 200 and lang in self.emb_layers[id]:
+                if len(langs[lang]) < 200 and lang in self.emb_layers[str(id)]:
                     langs[lang].append(id)
 
         for lang in langs:
