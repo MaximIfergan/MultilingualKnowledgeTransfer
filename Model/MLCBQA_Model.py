@@ -408,6 +408,6 @@ def main():
     model_name = "mT5-base"
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
     model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
-    tokenizer = MT5Tokenizer.from_pretrained(dir)
+    tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
     val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[:50]
     save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}.pkl')
