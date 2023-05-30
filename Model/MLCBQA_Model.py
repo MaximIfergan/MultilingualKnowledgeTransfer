@@ -403,7 +403,7 @@ def main():
     # print("end save res")
 
     # =========================      Debug saving the embeddings:      =========================
-    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/predictions.csv"
+    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
     predictions = pd.read_csv(pred_dir)
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
     df = df.loc[df['DataType'] == "dev"]
@@ -413,11 +413,11 @@ def main():
     df = df.loc[df['F1'] > 0.5]
     df = df.loc[df['Dataset'] != "NQ"]
 
-    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/model_files"
+    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/model_files"
     model_name = "mT5-large"
     model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
     tokenizer = MT5Tokenizer.from_pretrained("google/mT5-large")
-    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/embedding_layers_{model_name}.pkl')
+    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_{model_name}.pkl')
 
     # sent = "today everything in fine"
     # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-small")
