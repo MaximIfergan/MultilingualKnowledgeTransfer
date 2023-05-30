@@ -117,8 +117,6 @@ def evaluate(tokenizer, model, loader, save_embedding=False):
                 repetition_penalty=2.5,
                 length_penalty=1.0,
                 early_stopping=True,
-                output_hidden_states=save_embedding,
-                return_dict_in_generate=save_embedding
             )
 
             preds = [tokenizer.decode(g, skip_special_tokens=True, clean_up_tokenization_spaces=True) for g in
@@ -404,10 +402,66 @@ def main():
     # print("end save res")
 
     # =========================      Debug saving the embeddings:      =========================
-    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
-    model_name = "mT5-base"
+    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
+    # model_name = "mT5-base"
+    # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    # model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
+    # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
+    # val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)
+    # save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}.pkl')
+
+    # sent = "today everything in fine"
+    # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-small")
+    # model = MT5ForConditionalGeneration.from_pretrained("google/mT5-small")
+    #
+    # source = tokenizer.batch_encode_plus(
+    #     [sent],
+    #     max_length=None,
+    #     pad_to_max_length=False,
+    #     truncation=True,
+    #     return_tensors="pt",
+    # )
+    #
+    # for g in list(source["input_ids"][0]):
+    #     print("============")
+    #     print(g)
+    #     print(tokenizer.decode(g))
+    #     print("============")
+    #
+    # out = model.generate(
+    #     input_ids=source["input_ids"],
+    #     attention_mask=source['attention_mask'],
+    #     repetition_penalty=2.5,
+    #     num_beams=2,
+    #     length_penalty=1.0,
+    #     early_stopping=True,
+    #     output_hidden_states=True,
+    #     return_dict_in_generate=True
+    # )
+
+    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    predictions = pd.read_csv(pred_dir)
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
-    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
-    tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
-    val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)
-    save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}.pkl')
+    df = df.loc[df['DataType'] == "dev"]
+    df["Prediction"] = list(predictions["Generated Text"])
+    df["F1"] = list(predictions["F1"])
+    df["EM"] = list(predictions["EM"])
+    df = df.loc[df['F1'] > 0.5]
+    df = df[df['Dataset'] != "NQ"]
+    correct_ids = set(df["Id"].unique())
+
+    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_mT5-base.pkl', 'rb') as fp:
+        big_dict = pickle.load(fp)
+
+    smaller_dict = dict()
+    for id in correct_ids:
+        smaller_dict[id] = dict()
+        for lang in big_dict[id]:
+            new_decoder_hidden_states = []
+            for layer in big_dict[id][lang].decoder_hidden_states:
+                new_decoder_hidden_states.append(layer[1, 5, 8])
+            smaller_dict[id][lang] = {"encoder_hidden_states": big_dict[id][lang].encoder_hidden_states[1, 5, 8],
+                                            "decoder_hidden_states": new_decoder_hidden_states}
+
+    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/small_embedding_layers_mT5-base.pkl', 'wb') as fp:
+        pickle.dump(smaller_dict, fp)

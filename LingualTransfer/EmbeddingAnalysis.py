@@ -45,9 +45,6 @@ class EmbeddingAnalysis:
         encoder_dist = np.zeros(num_of_layers)
         decoder_dist = np.zeros(num_of_layers)
         example_num = 0
-        random_encoder_dist = np.zeros(num_of_layers)
-        random_decoder_dist = np.zeros(num_of_layers)
-        random_example_num = 0
         df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
         ids = list(df["Id"].unique())
         for id in ids:
@@ -64,7 +61,9 @@ class EmbeddingAnalysis:
                     encoder_dist += ij_encoder_dist
                     decoder_dist += ij_decoder_dist
                     example_num += 1
-
+        encoder_dist = encoder_dist / example_num
+        decoder_dist = decoder_dist / example_num
+        return encoder_dist, decoder_dist
 
     def aggregate_dist_same_lang_different_questions(self, dist_function):
         pass
