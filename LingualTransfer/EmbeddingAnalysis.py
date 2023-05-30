@@ -66,7 +66,7 @@ class EmbeddingAnalysis:
         df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
         df = df.loc[df['Dataset'] != "NQ"]
         ids = list(df["Id"].unique())
-        a_lang = self.emb_layers[str(ids[0])].keys()[0]
+        a_lang = list(self.emb_layers[str(ids[0])].keys())[0]
         encoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["encoder_hidden_states"]))
         decoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["decoder_hidden_states"][0]))
         for id in ids:
@@ -92,7 +92,7 @@ class EmbeddingAnalysis:
         df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
         df = df.loc[df['Dataset'] != "NQ"]
         ids = list(df["Id"].unique())
-        a_lang = self.emb_layers[str(ids[0])].keys()[0]
+        a_lang = list(self.emb_layers[str(ids[0])].keys())[0]
         encoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["encoder_hidden_states"]))
         decoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["decoder_hidden_states"][0]))
 
@@ -136,7 +136,7 @@ class EmbeddingAnalysis:
         df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
         df = df.loc[df['Dataset'] != "NQ"]
         ids = list(df["Id"].unique())
-        a_lang = self.emb_layers[str(ids[0])].keys()[0]
+        a_lang = list(self.emb_layers[str(ids[0])].keys())[0]
         encoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["encoder_hidden_states"]))
         decoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["decoder_hidden_states"][0]))
 
