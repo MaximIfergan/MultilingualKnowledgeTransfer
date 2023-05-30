@@ -106,8 +106,8 @@ class EmbeddingAnalysis:
                     langs[lang].append(id)
 
         for lang in langs:
-            first_ids = random.choices(langs[lang], k=50)
-            second_ids = random.choices(langs[lang], k=50)
+            first_ids = random.choices(langs[lang], k=20)
+            second_ids = random.choices(langs[lang], k=20)
             for first_id in first_ids:
                 for second_id in second_ids:
                     if first_id == second_id:
@@ -140,8 +140,8 @@ class EmbeddingAnalysis:
         encoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["encoder_hidden_states"]))
         decoder_dist = np.zeros(len(self.emb_layers[str(ids[0])][a_lang]["decoder_hidden_states"][0]))
 
-        first_ids = random.choices(ids, k=80)
-        second_ids = random.choices(ids, k=80)
+        first_ids = random.choices(ids, k=50)
+        second_ids = random.choices(ids, k=50)
         for first_id in first_ids:
             first_id_lang = random.choice(self.emb_layers[first_id].keys())
             for second_id in second_ids:
