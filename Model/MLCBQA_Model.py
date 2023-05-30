@@ -215,7 +215,7 @@ def save_embedding_layers(tokenizer, model, dataset, source_col, target_col, out
     with torch.no_grad():
         for _, data in enumerate(val_loader, 0):
 
-            if count % 10 == 0:
+            if count % 1000 == 0:
                 print(f"evaluation at: {round(100 * count / dataset_size)}%")
 
             ids = data['source_ids'].to(DEVICE, dtype=torch.long).to(DEVICE)
@@ -409,5 +409,5 @@ def main():
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
     model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
     tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
-    val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[:50]
+    val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)
     save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}.pkl')
