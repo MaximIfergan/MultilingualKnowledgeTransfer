@@ -232,8 +232,9 @@ def save_embedding_layers(tokenizer, model, dataset, source_col, target_col, out
 
             if data["id"][0] not in embedding_layers:
                 embedding_layers[data["id"][0]] = dict()
-            embedding_layers[data["id"][0]][data["lang"][0]] = {"encoder_hidden_states": out.encoder_hidden_states,
-                                            "decoder_hidden_states": out.decoder_hidden_states}
+            saved_decoder_hidden_states = [layer[1, 5, 8] for layer in out.decoder_hidden_states]
+            embedding_layers[data["id"][0]][data["lang"][0]] = {"encoder_hidden_states": out.encoder_hidden_states[1, 5, 8],
+                                            "decoder_hidden_states": saved_decoder_hidden_states}
 
             count += 1
 
@@ -402,13 +403,21 @@ def main():
     # print("end save res")
 
     # =========================      Debug saving the embeddings:      =========================
-    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
-    # model_name = "mT5-base"
-    # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
-    # model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
-    # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
-    # val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)
-    # save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}.pkl')
+    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    predictions = pd.read_csv(pred_dir)
+    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    df = df.loc[df['DataType'] == "dev"]
+    df["Prediction"] = list(predictions["Generated Text"])
+    df["F1"] = list(predictions["F1"])
+    df["EM"] = list(predictions["EM"])
+    df = df.loc[df['F1'] > 0.5]
+    df = df.loc[df['Dataset'] != "NQ"]
+
+    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
+    model_name = "mT5-base"
+    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
+    tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
+    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_{model_name}_new.pkl')
 
     # sent = "today everything in fine"
     # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-small")
@@ -439,29 +448,29 @@ def main():
     #     return_dict_in_generate=True
     # )
 
-    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
-    predictions = pd.read_csv(pred_dir)
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
-    df = df.loc[df['DataType'] == "dev"]
-    df["Prediction"] = list(predictions["Generated Text"])
-    df["F1"] = list(predictions["F1"])
-    df["EM"] = list(predictions["EM"])
-    df = df.loc[df['F1'] > 0.5]
-    df = df[df['Dataset'] != "NQ"]
-    correct_ids = set(df["Id"].unique())
-
-    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_mT5-base.pkl', 'rb') as fp:
-        big_dict = pickle.load(fp)
-
-    smaller_dict = dict()
-    for id in correct_ids:
-        smaller_dict[id] = dict()
-        for lang in big_dict[id]:
-            new_decoder_hidden_states = []
-            for layer in big_dict[id][lang].decoder_hidden_states:
-                new_decoder_hidden_states.append(layer[1, 5, 8])
-            smaller_dict[id][lang] = {"encoder_hidden_states": big_dict[id][lang].encoder_hidden_states[1, 5, 8],
-                                            "decoder_hidden_states": new_decoder_hidden_states}
-
-    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/small_embedding_layers_mT5-base.pkl', 'wb') as fp:
-        pickle.dump(smaller_dict, fp)
+    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    # predictions = pd.read_csv(pred_dir)
+    # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    # df = df.loc[df['DataType'] == "dev"]
+    # df["Prediction"] = list(predictions["Generated Text"])
+    # df["F1"] = list(predictions["F1"])
+    # df["EM"] = list(predictions["EM"])
+    # df = df.loc[df['F1'] > 0.5]
+    # df = df[df['Dataset'] != "NQ"]
+    # correct_ids = set(df["Id"].unique())
+    #
+    # with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_mT5-base.pkl', 'rb') as fp:
+    #     big_dict = pickle.load(fp)
+    #
+    # smaller_dict = dict()
+    # for id in correct_ids:
+    #     smaller_dict[id] = dict()
+    #     for lang in big_dict[id]:
+    #         new_decoder_hidden_states = []
+    #         for layer in big_dict[id][lang].decoder_hidden_states:
+    #             new_decoder_hidden_states.append(layer[1, 5, 8])
+    #         smaller_dict[id][lang] = {"encoder_hidden_states": big_dict[id][lang].encoder_hidden_states[1, 5, 8],
+    #                                         "decoder_hidden_states": new_decoder_hidden_states}
+    #
+    # with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/small_embedding_layers_mT5-base.pkl', 'wb') as fp:
+    #     pickle.dump(smaller_dict, fp)
