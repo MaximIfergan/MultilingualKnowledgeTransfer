@@ -202,17 +202,22 @@ def evaluate_metrics(gold_answers, predictions):
     return {'exact_match': exact_match, 'f1': f1, 'f1_scores': f1_scores, 'exact_match_scores': exact_match_scores}
 
 
-def save_evaluation_embedding(tokenizer, model, dataset, source_col, target_col, output_path):
+def save_embedding_layers(tokenizer, model, dataset, source_col, target_col, output_path):
 
-    # TODO add prints for logs
-    result = dict()
+    dataset_size = dataset.shape[0]
+
+    embedding_layers = dict()
     val_set = MLCBQA_Dataset(dataset, tokenizer, None, None, source_col, target_col, pad_to_max_length=False)
     val_params = {"batch_size": 1, "shuffle": False, "num_workers": 0}
     val_loader = DataLoader(val_set, **val_params)
 
+    count = 0
     with torch.no_grad():
         for _, data in enumerate(val_loader, 0):
-            y = data['target_ids'].to(DEVICE, dtype=torch.long)
+
+            if count % 10 == 0:
+                print(f"evaluation at: {round(100 * count / dataset_size)}%")
+
             ids = data['source_ids'].to(DEVICE, dtype=torch.long)
             mask = data['source_mask'].to(DEVICE, dtype=torch.long)
 
@@ -227,11 +232,15 @@ def save_evaluation_embedding(tokenizer, model, dataset, source_col, target_col,
                 return_dict_in_generate=True
             )
 
-            if data["id"][0] not in result:
-                result[data["id"][0]] = dict()
-            result[data["id"][0]][data["lang"][0]] = {"encoder_hidden_states": out.encoder_hidden_states,
+            if data["id"][0] not in embedding_layers:
+                embedding_layers[data["id"][0]] = dict()
+            embedding_layers[data["id"][0]][data["lang"][0]] = {"encoder_hidden_states": out.encoder_hidden_states,
                                             "decoder_hidden_states": out.decoder_hidden_states}
-    return result
+
+            count += 1
+
+    with open(output_path, 'wb') as fp:
+        pickle.dump(embedding_layers, fp)
 
 
 def MT5Trainer(dataframe, source_text, target_text, model_params, output_dir="./SavedModels/"):
@@ -395,14 +404,11 @@ def main():
     # print("end save res")
 
     # =========================      Debug saving the embeddings:      =========================
-    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
-    model_name = None
+    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/mT5-base/model-epoch-0"
+    dir = "google/mt5-small"
+    model_name = "mt5-small"
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
     model = MT5ForConditionalGeneration.from_pretrained(dir)
     tokenizer = MT5Tokenizer.from_pretrained(dir)
     val_dataset = df[df['DataType'] == "dev"].reset_index(drop=True)[:50]
-    embedding_layers = save_evaluation_embedding(tokenizer, model, val_dataset, "Question", "Answer", "")
-    with open(f'embedding_layers{model_name}.pkl', 'wb') as fp:
-        pickle.dump(embedding_layers, fp)
-
-
+    save_embedding_layers(tokenizer, model, val_dataset, "Question", "Answer", f'embedding_layers_{model_name}.pkl')

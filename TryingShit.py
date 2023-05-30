@@ -19,13 +19,11 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-# print(torch.cuda.is_available())
-# print(np.array([1, 1, 1]))
-# DEVICE = 'cuda'
-# a = torch.Tensor([1, 2, 3])
-# a.to(DEVICE)
+a = (1, 2, 3)
+for i in a:
+    print(i)
 
-print_title("Debug saving the embeddings:")
+# print_title("Debug saving the embeddings:")
 # output_dir = "Model/SavedModels"
 # model = MT5ForConditionalGeneration.from_pretrained("google/mt5-small")
 # path = os.path.join(output_dir, "model_files")

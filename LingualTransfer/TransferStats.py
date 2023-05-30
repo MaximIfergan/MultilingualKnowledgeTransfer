@@ -142,11 +142,6 @@ def all_answer_to_lang_answer(predictions_path, output_dir="", data_path="Data/D
     for row_index, row in data.iterrows():
         lang = row["Language"]
 
-        # TODO delete!
-        if lang in ["ar", "ja"]:
-            i += 1
-            continue
-
         if row["Dataset"] == "NQ":
             actuals.append(row["Answer"])
             predictions.append(model_predictions[i])
@@ -170,16 +165,17 @@ class TransferStats:
 
     def __init__(self, model_predictions, exp_name, id2entities_path=ID2ENTITIES_PATH, entity2pv_path=ENTITY2PV_PATH,
                  data_path=DATASET_PATH):
-        # predictions = pd.read_csv(model_predictions)
+        predictions = pd.read_csv(model_predictions)
         self.exp_name = exp_name
 
-        # self.results = pd.read_csv(data_path)
-        # self.results = self.results.loc[self.results['DataType'] == "dev"]
-        # self.results["Prediction"] = list(predictions["Generated Text"])
-        # self.results["F1"] = list(predictions["F1"])
-        # self.results["EM"] = list(predictions["EM"])
+        self.results = pd.read_csv(data_path)
+        self.results = self.results.loc[self.results['DataType'] == "dev"]
+        self.results["Prediction"] = list(predictions["Generated Text"])
+        self.results["F1"] = list(predictions["F1"])
+        self.results["EM"] = list(predictions["EM"])
 
-        self.results = pd.read_csv('Model/SavedModels/mT5-base-6-ep-inter/validation_set_with_results.csv')
+        # For old dataset (Intersect)
+        # self.results = pd.read_csv('Model/SavedModels/mT5-base-6-ep-inter/validation_set_with_results.csv')
 
         with open(id2entities_path, "rb") as fp:
             self.id2entities = pickle.load(fp)
