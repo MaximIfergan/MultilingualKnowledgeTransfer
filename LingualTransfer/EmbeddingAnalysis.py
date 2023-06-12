@@ -150,6 +150,8 @@ class EmbeddingAnalysis:
 
 
 def main():
+
+    # TODO: if the saving works delete the mean stuff of the decoder and encoder
     print("================ mT5-Base ================")
     pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
     with open(
