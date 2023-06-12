@@ -1,5 +1,4 @@
 import random
-
 import pandas as pd
 import numpy as np
 import torch
@@ -11,22 +10,6 @@ import Data.DataPreprocessing as DataPreprocessing
 F1_SUCCESS = 0.5
 
 # ===============================      Global functions:      ===============================
-
-
-def mean_decoder_embedding(embedding):
-    result = []
-    for layer_index in range(len(embedding[0])):
-        layer_mean = torch.zeros_like(embedding[0][layer_index])
-        for token_index in range(len(embedding)):
-            layer_mean += embedding[token_index][layer_index]
-        layer_mean /= len(embedding)
-        result.append(layer_mean)
-    return result
-
-
-def mean_encoder_embedding(embedding):
-    result = [torch.mean(layer, dim=1) for layer in embedding]
-    return result
 
 
 def cos_similarity(a_embedding, b_embedding):

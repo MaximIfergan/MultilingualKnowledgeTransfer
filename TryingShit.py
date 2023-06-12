@@ -19,11 +19,11 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-a = (1, 2, 3)
-for i in a:
+a = (1, 2, 3, 4)
+for i in a[::2]:
     print(i)
 
-# print_title("Debug saving the embeddings:")
+print_title("save embeddings:")
 # output_dir = "Model/SavedModels"
 # model = MT5ForConditionalGeneration.from_pretrained("google/mt5-small")
 # path = os.path.join(output_dir, "model_files")

@@ -11,8 +11,8 @@ def main():
     # QA_Linking.main()
     # EntityStats.main()
     # TransferStats.main()
-    # MLCBQA_Model.main()
-    EmbeddingAnalysis.main()
+    MLCBQA_Model.main()
+    # EmbeddingAnalysis.main()
 
 if __name__ == "__main__":
     main()
