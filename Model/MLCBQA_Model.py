@@ -224,7 +224,7 @@ def save_embedding_layers(tokenizer, model, dataset, source_col, target_col, out
     val_set = MLCBQA_Dataset(dataset, tokenizer, None, None, source_col, target_col, pad_to_max_length=False)
     val_params = {"batch_size": 1, "shuffle": False, "num_workers": 0}
     val_loader = DataLoader(val_set, **val_params)
-
+    flag = False
     count = 0
     with torch.no_grad():
         for _, data in enumerate(val_loader, 0):
@@ -249,10 +249,9 @@ def save_embedding_layers(tokenizer, model, dataset, source_col, target_col, out
             if data["id"][0] not in embedding_layers:
                 embedding_layers[data["id"][0]] = dict()
 
-
-            saved_decoder_hidden_states = [layer[::2] for layer in out.decoder_hidden_states]
+            saved_decoder_hidden_states = [layer for layer in out.decoder_hidden_states]
             saved_decoder_hidden_states = mean_decoder_embedding(saved_decoder_hidden_states)
-            saved_encoder_hidden_states = mean_encoder_embedding(out.encoder_hidden_states[::2])
+            saved_encoder_hidden_states = mean_encoder_embedding(out.encoder_hidden_states)
             embedding_layers[data["id"][0]][data["lang"][0]] = {"encoder_hidden_states": saved_encoder_hidden_states,
                                                                 "decoder_hidden_states": saved_decoder_hidden_states}
 
@@ -438,46 +437,28 @@ def main():
     df = df.loc[df['Know'] == 1]
 
     dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/model_files"
-    model_name = "mT5-large"
     model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
     tokenizer = MT5Tokenizer.from_pretrained("google/mT5-large")
-    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_{model_name}.pkl')
+    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl')
 
 
 
-    # =========================      Debug saving the embeddings:      =========================
-    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
-    predictions = pd.read_csv(pred_dir)
-    df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
-    df = df.loc[df['DataType'] == "dev"]
-    df["Prediction"] = list(predictions["Generated Text"])
-    df["F1"] = list(predictions["F1"])
-    df["EM"] = list(predictions["EM"])
-    df = df.loc[df['F1'] > 0.5]
-    df = df.loc[df['Dataset'] != "NQ"]
-
-    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/model_files"
-    model_name = "mT5-large"
-    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
-    tokenizer = MT5Tokenizer.from_pretrained("google/mT5-large")
-    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_{model_name}.pkl')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # # =========================      Debug saving the embeddings:      =========================
+    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
+    # predictions = pd.read_csv(pred_dir)
+    # df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
+    # df = df.loc[df['DataType'] == "dev"]
+    # df["Prediction"] = list(predictions["Generated Text"])
+    # df["F1"] = list(predictions["F1"])
+    # df["EM"] = list(predictions["EM"])
+    # df = df.loc[df['F1'] > 0.5]
+    # df = df.loc[df['Dataset'] != "NQ"]
+    #
+    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/model_files"
+    # model_name = "mT5-large"
+    # model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
+    # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-large")
+    # save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_{model_name}.pkl')
     # sent = "today everything in fine"
     # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-small")
     # model = MT5ForConditionalGeneration.from_pretrained("google/mT5-small")
