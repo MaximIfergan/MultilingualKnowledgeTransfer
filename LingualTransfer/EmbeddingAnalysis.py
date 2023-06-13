@@ -46,6 +46,7 @@ class EmbeddingAnalysis:
         self.results["F1"] = list(predictions["F1"])
         self.results["EM"] = list(predictions["EM"])
         self.results = self.results.loc[self.results['Dataset'] != "NQ"]
+        self.results = self.results.loc[(self.results['Language'] == "en") | (self.results['Language'] == "ar")]
         self.results["Know"] = 0
         ids = list(self.results.loc[self.results['F1'] > 0.5]["Id"].unique())
         for id in ids:
@@ -124,7 +125,7 @@ class EmbeddingAnalysis:
         decoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["decoder_hidden_states"]))]
 
         langs = dict()
-        for lang in set(DataPreprocessing.MKQA_LANGS + DataPreprocessing.MINTAKA_LANGS):
+        for lang in list(self.results["Language"].unique()):
             langs[lang] = []
 
         for id in ids:
