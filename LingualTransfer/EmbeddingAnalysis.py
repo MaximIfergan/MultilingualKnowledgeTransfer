@@ -241,51 +241,14 @@ class EmbeddingAnalysis:
 
 
 def main():
-    print("================ mT5-small testing ================")
-    pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
-    with open("embedding_layers_test.pkl", 'rb') as fp:
-        embedding_layers = pickle.load(fp)
-    ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    ea.plot_all(out="plots/")
-    exit(0)
-
-
-    print("================ mT5-Base ================")
     pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
-    with open(
-            '/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_mT5-base_new.pkl',
-            'rb') as fp:
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
     ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    print("aggregate_dist_same_question_different_langs(cos_similarity):")
-    print(ea.aggregate_dist_same_question_different_langs(cos_similarity))
-    print("aggregate_dist_same_question_different_langs(l2_similarity):")
-    print(ea.aggregate_dist_same_question_different_langs(l2_similarity))
-    print("aggregate_dist_same_lang_different_questions(cos_similarity):")
-    print(ea.aggregate_dist_same_lang_different_questions(cos_similarity))
-    print("aggregate_dist_same_lang_different_questions(l2_similarity):")
-    print(ea.aggregate_dist_same_lang_different_questions(l2_similarity))
-    print("aggregate_dist_random(cos_similarity):")
-    print(ea.aggregate_dist_random(cos_similarity))
-    print("aggregate_dist_random(l2_similarity)")
-    print(ea.aggregate_dist_random(l2_similarity))
+    ea.plot_all(out="plots/mT5-base/")
 
-    print("================ mT5-Large ================")
     pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
-    with open(
-            '/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_mT5-large.pkl',
-            'rb') as fp:
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
-    ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    print("aggregate_dist_same_question_different_langs(cos_similarity):")
-    print(ea.aggregate_dist_same_question_different_langs(cos_similarity))
-    print("aggregate_dist_same_question_different_langs(l2_similarity):")
-    print(ea.aggregate_dist_same_question_different_langs(l2_similarity))
-    print("aggregate_dist_same_lang_different_questions(cos_similarity):")
-    print(ea.aggregate_dist_same_lang_different_questions(cos_similarity))
-    print("aggregate_dist_same_lang_different_questions(l2_similarity):")
-    print(ea.aggregate_dist_same_lang_different_questions(l2_similarity))
-    print("aggregate_dist_random(cos_similarity):")
-    print(ea.aggregate_dist_random(cos_similarity))
-    print("aggregate_dist_random(l2_similarity)")
-    print(ea.aggregate_dist_random(l2_similarity))
+    ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    ea.plot_all(out="plots/mT5-large/")
