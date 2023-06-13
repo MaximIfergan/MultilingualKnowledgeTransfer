@@ -423,6 +423,7 @@ def main():
 
     # ===============================      save embeddings:      ===============================
     pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
     predictions = pd.read_csv(pred_dir)
     df = pd.read_csv("Data/Datasets/PreprocessDatasetAllLangs.csv")
     df = df.loc[df['DataType'] == "dev"]
@@ -435,11 +436,17 @@ def main():
     for id in ids:
         df.loc[df['Id'] == id, 'Know'] = 1
     df = df.loc[df['Know'] == 1]
+    df = df[:1000]
 
-    dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
-    model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
-    tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
-    save_embedding_layers(tokenizer, model, df, "Question", "Answer", f'/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl')
+    # dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/model_files"
+    # model = MT5ForConditionalGeneration.from_pretrained(dir).to(DEVICE)
+    # tokenizer = MT5Tokenizer.from_pretrained("google/mT5-base")
+
+    dir = "google/mt5-small"
+    model = MT5ForConditionalGeneration.from_pretrained(dir)
+    tokenizer = MT5Tokenizer.from_pretrained("google/mt5-small")
+
+    save_embedding_layers(tokenizer, model, df, "Question", "Answer", 'embedding_layers_test.pkl')
 
 
 
