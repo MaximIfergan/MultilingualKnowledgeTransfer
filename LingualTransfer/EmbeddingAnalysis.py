@@ -213,10 +213,13 @@ class EmbeddingAnalysis:
         plt.savefig(out + title)
 
     def plot_all(self, out=""):
+        print(f"same lang {self.model_name}")
         same_language_cos = self.aggregate_dist_same_lang_different_questions(cos_similarity)
         same_language_l2 = self.aggregate_dist_same_lang_different_questions(l2_similarity)
+        print(f"same qa {self.model_name}")
         same_question_cos = self.aggregate_dist_same_question_different_langs(cos_similarity)
         same_question_l2 = self.aggregate_dist_same_question_different_langs(l2_similarity)
+        print(f"random qa {self.model_name}")
         random_cos = self.aggregate_dist_random(cos_similarity)
         random_l2 = self.aggregate_dist_random(l2_similarity)
         data = {"Same Language": same_language_cos["encoder"],
@@ -238,14 +241,18 @@ class EmbeddingAnalysis:
 
 
 def main():
-    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
-    # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
-    #     embedding_layers = pickle.load(fp)
-    # ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    # ea.plot_all(out="plots/mT5-base/")
+    print("Start base:")
+    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
+        embedding_layers = pickle.load(fp)
+    ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    ea.plot_all(out="plots/mT5-base/")
+    print("End base:")
 
+    print("Start large:")
     pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
     with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
     ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
     ea.plot_all(out="plots/mT5-large/")
+    print("End large:")
