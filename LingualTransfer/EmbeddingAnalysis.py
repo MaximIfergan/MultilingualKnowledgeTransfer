@@ -52,9 +52,6 @@ class EmbeddingAnalysis:
             self.results.loc[self.results['Id'] == id, 'Know'] = 1
         self.results = self.results.loc[self.results['Know'] == 1]
         self.results["Id"] = self.results["Id"].apply(lambda x: str(x))
-
-        self.results = self.results[:1000]  # TODO: remove- only for debug
-
         self.encoder_mean, self.decoder_mean = self.calculate_embedding_mean()
         self.normalize_emb_layers()
 
@@ -169,8 +166,8 @@ class EmbeddingAnalysis:
         encoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["encoder_hidden_states"]))]
         decoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["decoder_hidden_states"]))]
 
-        first_ids = random.choices(ids, k=50)  # k = 50
-        second_ids = random.choices(ids, k=50)  # k = 50
+        first_ids = random.choices(ids, k=50)   # k = 50
+        second_ids = random.choices(ids, k=50)   # k = 50
         for first_id in first_ids:
             first_id_lang = random.choice(list(self.emb_layers[first_id].keys()))
             for second_id in second_ids:
