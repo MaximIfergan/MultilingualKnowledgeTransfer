@@ -1,19 +1,20 @@
 import json
 import pandas as pd
 import gzip
+
 # import tensorflow as tf  # when running on CSE -> tensorflow compiler had a lot of errors
 
 # ===============================      Global Variables:      ===============================
 
 FINETUNING_LANGS_INTERSEC = ["en", "ar", "de", "ja", "pt", "es", "it", "fr"]
 
-CODE2LANG = {"en":"English", "ar": "Arabic", "de":"German", "ja":"Japanese", "pt":"Portuguese",
-             "es":"Spanish", "it":"Italian", "fr":"French", "hi":"Hindi"}
+CODE2LANG = {"en": "English", "ar": "Arabic", "de": "German", "ja": "Japanese", "pt": "Portuguese",
+             "es": "Spanish", "it": "Italian", "fr": "French", "hi": "Hindi"}
 
 MINTAKA_LANGS = ["en", "ar", "de", "ja", "pt", "es", "it", "fr", "hi"]
 
 MKQA_LANGS = ["en", "ar", "da", "de", "es", "fi", "fr", "he", "hu", "it", "ja", "km", "ko", "ms", "nl", "no",
-                         "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh_cn"]
+              "pl", "pt", "ru", "sv", "th", "tr", "vi", "zh_cn"]
 
 DATASETS_TYPES = ["binary",
                   "yesno",
@@ -110,6 +111,7 @@ def assemble_answers_in_all_languages(data):
         count += 1
     return data
 
+
 # ==================================      Class Code:      ==================================
 
 
@@ -142,7 +144,8 @@ class DataPreprocessing:
         # Filter data:
         data = [dic for dic in data if (len(dic['answers']['en']) == 1)]  # remove several answers
         data = [dic for dic in data if
-                dic['answers']['en'][0]['type'] not in ['unanswerable', 'long_answer', 'short_phrase']]  # remove unanswerable questions
+                dic['answers']['en'][0]['type'] not in ['unanswerable', 'long_answer',
+                                                        'short_phrase']]  # remove unanswerable questions
         data = [dic for dic in data if
                 len(dic['answers']['en'][0]['text'].split()) < MAX_WORDS_IN_ANSWER]  # remove long answers
         data_rows = []
@@ -238,12 +241,15 @@ class DataPreprocessing:
         print(f"Total: {self.data.shape[0]}")
         print(f"Training: {self.data.loc[self.data['DataType'] == 'train'].shape[0]}")
         print(f"Training: {self.data.loc[self.data['DataType'] == 'dev'].shape[0]}")
-        print(f"NQ: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'NQ')].shape[0]} "
-              f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'NQ')].shape[0]}")
-        print(f"MKQA: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'MKQA')].shape[0]} "
-              f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'MKQA')].shape[0]}")
-        print(f"Mintaka: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'Mintaka')].shape[0]} "
-              f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'Mintaka')].shape[0]}")
+        print(
+            f"NQ: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'NQ')].shape[0]} "
+            f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'NQ')].shape[0]}")
+        print(
+            f"MKQA: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'MKQA')].shape[0]} "
+            f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'MKQA')].shape[0]}")
+        print(
+            f"Mintaka: Train: {self.data.loc[(self.data['DataType'] == 'train') & (self.data['Dataset'] == 'Mintaka')].shape[0]} "
+            f"Dev: {self.data.loc[(self.data['DataType'] == 'dev') & (self.data['Dataset'] == 'Mintaka')].shape[0]}")
 
 
 if __name__ == "__main__":

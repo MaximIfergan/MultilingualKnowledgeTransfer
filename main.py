@@ -14,5 +14,6 @@ def main():
     # MLCBQA_Model.main()
     EmbeddingAnalysis.main()
 
+
 if __name__ == "__main__":
     main()

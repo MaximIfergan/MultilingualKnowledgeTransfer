@@ -1,3 +1,4 @@
+import math
 import random
 import pandas as pd
 import numpy as np
@@ -5,6 +6,7 @@ import torch
 import matplotlib.pyplot as plt
 from Model.MLCBQA_Model import *
 import Data.DataPreprocessing as DataPreprocessing
+from CKA import kernel_CKA, linear_CKA
 
 # ===============================      Global Variables:      ===============================
 
@@ -37,22 +39,28 @@ class EmbeddingAnalysis:
     """ this class produce statistics analysis on the success of the model on the different languages """
 
     def __init__(self, embedding_layers, model_name, data_path, model_predictions):
-        predictions = pd.read_csv(model_predictions)
         self.emb_layers = embedding_layers
         self.model_name = model_name
+
+        predictions = pd.read_csv(model_predictions)
         self.results = pd.read_csv(data_path)
         self.results = self.results.loc[self.results['DataType'] == "dev"]
         self.results["Prediction"] = list(predictions["Generated Text"])
         self.results["F1"] = list(predictions["F1"])
         self.results["EM"] = list(predictions["EM"])
         self.results = self.results.loc[self.results['Dataset'] != "NQ"]
-        self.results = self.results.loc[(self.results['Language'] == "en") | (self.results['Language'] == "ar")]
+
+        # self.results = self.results.loc[(self.results['Language'] == "en") | (self.results['Language'] == "ar")]
+
         self.results["Know"] = 0
         ids = list(self.results.loc[self.results['F1'] > 0.5]["Id"].unique())
         for id in ids:
             self.results.loc[self.results['Id'] == id, 'Know'] = 1
-        self.results = self.results.loc[self.results['Know'] == 1]
+
+        self.results = self.results.loc[self.results['Know'] == 1][:1000]  # TODO for debug
+
         self.results["Id"] = self.results["Id"].apply(lambda x: str(x))
+
         self.encoder_mean, self.decoder_mean = self.calculate_embedding_mean()
         self.normalize_emb_layers()
 
@@ -90,14 +98,62 @@ class EmbeddingAnalysis:
         normalize_embedding = [embedding[i] - self.decoder_mean[i] for i in range(len(embedding))]
         return normalize_embedding
 
+    def same_question_different_langs(self):
+        ids = list(self.results["Id"].unique())
+        first_group = []
+        second_group = []
+        for id in ids:
+            id_langs = list(self.results.loc[(self.results["Id"] == id) & (self.results['F1'] > 0.5)]["Language"])
+            for i in range(len(id_langs)):
+                first_group.append((id, id_langs[i]))
+                for j in range(i + 1, len(id_langs)):
+                    second_group.append((id, id_langs[j]))
+        return first_group, second_group
+
+    def same_lang_different_questions(self):
+        first_group = []
+        second_group = []
+        data_langs = list(self.results["Language"].unique())
+        for lang in data_langs:
+            lang_ids = list(
+                self.results.loc[(self.results["Language"] == lang) & (self.results['F1'] > 0.5)]["Id"].unique())
+            lang_ids = [(id, lang) for id in lang_ids]
+            first_group += lang_ids[:math.floor(len(lang_ids) / 2)]
+            second_group += lang_ids[math.ceil(len(lang_ids) / 2):]
+        return first_group, second_group
+
+    def random(self):
+        all_q = []
+        df = self.results.loc[self.results['F1'] > 0.5]
+        for index, row in df.iterrows():
+            all_q.append((row["Id"], row["Language"]))
+        random.shuffle(all_q)
+        first_group = all_q[:math.floor(len(all_q) / 2)]
+        second_group = all_q[math.ceil(len(all_q) / 2):]
+        return first_group, second_group
+
+    def calculate_distances(self, first_group, second_group, number_of_samples, dist_function):
+        assert len(first_group) == len(second_group)
+        r_id, r_lang = first_group[0]
+        first_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
+                             for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        second_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
+                              for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        first_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
+                             for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        second_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
+                              for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        for i in range(len(first_group)):
+            pass
+
+
     def aggregate_dist_same_question_different_langs(self, dist_function):
-        df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
-        ids = list(df["Id"].unique())
+        ids = list(self.results["Id"].unique())
         a_lang = list(self.emb_layers[ids[0]].keys())[0]
         encoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["encoder_hidden_states"]))]
         decoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["decoder_hidden_states"]))]
         for id in ids:
-            langs = list(df.loc[df["Id"] == id]["Language"].unique())
+            langs = list(self.results.loc[self.results["Id"] == id]["Language"].unique())
             for i in range(len(langs)):
                 lang_i_encoder_emb = self.emb_layers[id][langs[i]]["encoder_hidden_states"]
                 lang_i_decoder_emb = self.emb_layers[id][langs[i]]["decoder_hidden_states"]
@@ -118,8 +174,7 @@ class EmbeddingAnalysis:
                 "decoder": {"mean": decoder_mean_dists, "std": decoder_std_dists}}
 
     def aggregate_dist_same_lang_different_questions(self, dist_function):
-        df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
-        ids = list(df["Id"].unique())
+        ids = list(self.results["Id"].unique())
         a_lang = list(self.emb_layers[ids[0]].keys())[0]
         encoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["encoder_hidden_states"]))]
         decoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["decoder_hidden_states"]))]
@@ -136,8 +191,8 @@ class EmbeddingAnalysis:
         for lang in langs:
             if not langs[lang]:
                 continue
-            first_ids = random.choices(langs[lang], k=20)   # k = 20
-            second_ids = random.choices(langs[lang], k=20)   # k = 20
+            first_ids = random.choices(langs[lang], k=20)  # k = 20
+            second_ids = random.choices(langs[lang], k=20)  # k = 20
             for first_id in first_ids:
                 for second_id in second_ids:
                     if first_id == second_id:
@@ -160,15 +215,13 @@ class EmbeddingAnalysis:
                 "decoder": {"mean": decoder_mean_dists, "std": decoder_std_dists}}
 
     def aggregate_dist_random(self, dist_function):
-        df = self.results.loc[self.results['F1'] > F1_SUCCESS]  # only success answers
-        df = df.loc[df['Dataset'] != "NQ"]
-        ids = list(df["Id"].unique())
+        ids = list(self.results["Id"].unique())
         a_lang = list(self.emb_layers[ids[0]].keys())[0]
         encoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["encoder_hidden_states"]))]
         decoder_dists = [[] for _ in range(len(self.emb_layers[ids[0]][a_lang]["decoder_hidden_states"]))]
 
-        first_ids = random.choices(ids, k=50)   # k = 50
-        second_ids = random.choices(ids, k=50)   # k = 50
+        first_ids = random.choices(ids, k=50)  # k = 50
+        second_ids = random.choices(ids, k=50)  # k = 50
         for first_id in first_ids:
             first_id_lang = random.choice(list(self.emb_layers[first_id].keys()))
             for second_id in second_ids:
@@ -202,8 +255,10 @@ class EmbeddingAnalysis:
         for index, type in enumerate(data):
             # plt.errorbar(x, data[type]['mean'], data[type]['std'], label=type)
             plt.plot(x, data[type]['mean'], label=type, color=prams[index])
-            plt.plot(x, np.array(data[type]['mean']) + np.array(data[type]['std']), 'v', color=prams[index], markersize=4)
-            plt.plot(x, np.array(data[type]['mean']) - np.array(data[type]['std']), '^', color=prams[index], markersize=4)
+            plt.plot(x, np.array(data[type]['mean']) + np.array(data[type]['std']), 'v', color=prams[index],
+                     markersize=4)
+            plt.plot(x, np.array(data[type]['mean']) - np.array(data[type]['std']), '^', color=prams[index],
+                     markersize=4)
             # plt.fill_between(x, np.array(data[type]['mean']) + np.array(data[type]['std']),
             #                  np.array(data[type]['mean']), facecolor=prams[index][0], edgecolor=prams[index][0], alpha=0.2)
 
@@ -242,18 +297,27 @@ class EmbeddingAnalysis:
 
 
 def main():
-    print("Start base:")
-    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
-    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
-        embedding_layers = pickle.load(fp)
-    ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    ea.plot_all(out="plots/mT5-base/")
-    print("End base:")
-
     print("Start large:")
     pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
-    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
+    with open("embedding_layers_test.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
     ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
     ea.plot_all(out="plots/mT5-large/")
-    print("End large:")
+
+    # ============================= Analysis Result Last meeting ===============================
+
+    # print("Start base:")
+    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
+    #     embedding_layers = pickle.load(fp)
+    # ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    # ea.plot_all(out="plots/mT5-base/")
+    # print("End base:")
+    #
+    # print("Start large:")
+    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
+    # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
+    #     embedding_layers = pickle.load(fp)
+    # ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    # ea.plot_all(out="plots/mT5-large/")
+    # print("End large:")
