@@ -144,7 +144,22 @@ class EmbeddingAnalysis:
         second_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
                               for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
         for i in range(len(first_group)):
-            pass
+            for j in range(len(first_emb_encoder)):
+                first_emb_encoder[j] = np.concatenate(
+                    (first_emb_encoder[j],
+                     self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"]))
+                second_emb_encoder[j] = np.concatenate(
+                    (second_emb_encoder[j],
+                     self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"]))
+            for j in range(len(first_emb_decoder)):
+                first_emb_decoder[j] = np.concatenate(
+                    (first_emb_decoder[j],
+                     self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"]))
+                second_emb_decoder[j] = np.concatenate(
+                    (second_emb_decoder[j],
+                     self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"]))
+
+
 
 
     def aggregate_dist_same_question_different_langs(self, dist_function):

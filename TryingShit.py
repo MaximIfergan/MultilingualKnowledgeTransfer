@@ -10,7 +10,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 # import pickle
 import tensorflow as tf
-from transformers import MT5ForConditionalGeneration
+from transformers import MT5ForConditionalGeneration, MT5Tokenizer
 
 
 def print_title(title):
@@ -19,16 +19,29 @@ def print_title(title):
         res = "=" + res + "="
     print("# " + res)
 
-a = (1, 2, 3, 4)
-for i in a[::2]:
-    print(i)
 
-print_title("save embeddings:")
+# print_title("save embeddings:")
 # output_dir = "Model/SavedModels"
 # model = MT5ForConditionalGeneration.from_pretrained("google/mt5-small")
 # path = os.path.join(output_dir, "model_files")
 # model.save_pretrained(path)
 
+lst = ["What is George Rankin's occupation?",
+       "What is Henry Feilden's occupation?",
+       "What is Eleanor Davis's occupation?",
+       "What is Alexander Rinnooy Kan's occupation?",
+       "Who was the composer of Full House?",
+       "Who was the composer of Champion?",
+       "What is the capital of Netherlands?",
+       "What is the capital of Merthyr Tydfil County Borough?",
+       "איפה נולד בנימין נתניהו?",
+       "מה העיסוק של אביגדור ליברמן",
+       ]
+
+for snt in lst:
+    tokenizer = MT5Tokenizer.from_pretrained("google/mt5-base")
+    t = tokenizer.batch_encode_plus([snt], return_tensors="pt")
+    print(t["input_ids"].squeeze().shape[0])
 
 # # ==============================      Fix entity2pv dict:      ==============================
 #
