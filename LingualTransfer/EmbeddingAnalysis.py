@@ -17,19 +17,22 @@ F1_SUCCESS = 0.5
 
 
 def cos_similarity(a_embedding, b_embedding):
-    result = np.zeros((len(a_embedding)))
-    for i in range(len(a_embedding)):
-        result[i] = torch.cosine_similarity(torch.flatten(a_embedding[i])[None, :],
-                                            torch.flatten(b_embedding[i])[None, :]).item()
-    return result
+    return torch.cosine_similarity(torch.tensor(a_embedding), torch.tensor(b_embedding), dim=1)
+    # result = np.zeros((len(a_embedding)))
+    # for i in range(len(a_embedding)):
+    #     result[i] = torch.cosine_similarity(torch.flatten(a_embedding[i])[None, :],
+    #                                         torch.flatten(b_embedding[i])[None, :]).item()
+    # return result
 
 
 def l2_similarity(a_embedding, b_embedding):
-    result = np.zeros((len(a_embedding)))
-    for i in range(len(a_embedding)):
-        result[i] = torch.cdist(torch.flatten(a_embedding[i])[None, :],
-                                torch.flatten(b_embedding[i])[None, :], p=2).item()
-    return result
+    return np.linalg.norm(a_embedding - b_embedding, axis=1)
+
+    # result = np.zeros((len(a_embedding)))
+    # for i in range(len(a_embedding)):
+    #     result[i] = torch.cdist(torch.flatten(a_embedding[i])[None, :],
+    #                             torch.flatten(b_embedding[i])[None, :], p=2).item()
+    # return result
 
 
 # ====================================      Class:      ====================================
@@ -135,6 +138,8 @@ class EmbeddingAnalysis:
     def calculate_distances(self, first_group, second_group, number_of_samples, dist_function):
         assert len(first_group) == len(second_group)
         r_id, r_lang = first_group[0]
+
+        # Init embeddings:
         first_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
                              for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
         second_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
@@ -146,21 +151,23 @@ class EmbeddingAnalysis:
         for i in range(len(first_group)):
             for j in range(len(first_emb_encoder)):
                 first_emb_encoder[j] = np.concatenate(
-                    (first_emb_encoder[j],
-                     self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"]))
+                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"]))
                 second_emb_encoder[j] = np.concatenate(
-                    (second_emb_encoder[j],
-                     self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"]))
+                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"]))
             for j in range(len(first_emb_decoder)):
                 first_emb_decoder[j] = np.concatenate(
-                    (first_emb_decoder[j],
-                     self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"]))
+                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"]))
                 second_emb_decoder[j] = np.concatenate(
-                    (second_emb_decoder[j],
-                     self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"]))
+                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"]))
 
-
-
+        # Calculate distances:
+        encoder_distances = [dist_function(first_emb_encoder[i], second_emb_encoder[i])
+                             for i in range(len(first_emb_encoder))]
+        decoder_distances = [dist_function(first_emb_decoder[i], second_emb_decoder[i])
+                             for i in range(len(first_emb_decoder))]
+        encoder_distances = [{'mean': np.mean(layer), 'std': np.mean(layer)} for layer in encoder_distances]
+        decoder_distances = [{'mean': np.mean(layer), 'std': np.mean(layer)} for layer in decoder_distances]
+        return encoder_distances, decoder_distances
 
     def aggregate_dist_same_question_different_langs(self, dist_function):
         ids = list(self.results["Id"].unique())
