@@ -6,18 +6,17 @@ import torch
 import matplotlib.pyplot as plt
 from Model.MLCBQA_Model import *
 import Data.DataPreprocessing as DataPreprocessing
-from CKA import kernel_CKA, linear_CKA
+from LingualTransfer.CKA import kernel_CKA, linear_CKA
 
 # ===============================      Global Variables:      ===============================
 
 F1_SUCCESS = 0.5
 
-
 # ===============================      Global functions:      ===============================
 
 
 def cos_similarity(a_embedding, b_embedding):
-    return torch.cosine_similarity(torch.tensor(a_embedding), torch.tensor(b_embedding), dim=1)
+    return np.array(torch.cosine_similarity(torch.tensor(a_embedding), torch.tensor(b_embedding), dim=1))
     # result = np.zeros((len(a_embedding)))
     # for i in range(len(a_embedding)):
     #     result[i] = torch.cosine_similarity(torch.flatten(a_embedding[i])[None, :],
@@ -111,7 +110,8 @@ class EmbeddingAnalysis:
                 first_group.append((id, id_langs[i]))
                 for j in range(i + 1, len(id_langs)):
                     second_group.append((id, id_langs[j]))
-        return first_group, second_group
+        examples_num = min(len(first_group), len(second_group))
+        return first_group[:examples_num], second_group[:examples_num]
 
     def same_lang_different_questions(self):
         first_group = []
@@ -135,8 +135,11 @@ class EmbeddingAnalysis:
         second_group = all_q[math.ceil(len(all_q) / 2):]
         return first_group, second_group
 
-    def calculate_distances(self, first_group, second_group, number_of_samples, dist_function):
+    def calculate_distances(self, first_group, second_group, dist_function, number_of_samples=-1):
         assert len(first_group) == len(second_group)
+        number_of_samples = len(first_group) if number_of_samples == -1 else number_of_samples
+        first_group = first_group[:number_of_samples]
+        second_group = second_group[:number_of_samples]
         r_id, r_lang = first_group[0]
 
         # Init embeddings:
@@ -151,23 +154,96 @@ class EmbeddingAnalysis:
         for i in range(len(first_group)):
             for j in range(len(first_emb_encoder)):
                 first_emb_encoder[j] = np.concatenate(
-                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"]))
+                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j]))
                 second_emb_encoder[j] = np.concatenate(
-                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"]))
+                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j]))
             for j in range(len(first_emb_decoder)):
                 first_emb_decoder[j] = np.concatenate(
-                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"]))
+                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j]))
                 second_emb_decoder[j] = np.concatenate(
-                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"]))
+                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j]))
 
         # Calculate distances:
         encoder_distances = [dist_function(first_emb_encoder[i], second_emb_encoder[i])
                              for i in range(len(first_emb_encoder))]
         decoder_distances = [dist_function(first_emb_decoder[i], second_emb_decoder[i])
                              for i in range(len(first_emb_decoder))]
-        encoder_distances = [{'mean': np.mean(layer), 'std': np.mean(layer)} for layer in encoder_distances]
-        decoder_distances = [{'mean': np.mean(layer), 'std': np.mean(layer)} for layer in decoder_distances]
-        return encoder_distances, decoder_distances
+        encoder_mean_dists = [np.mean(layer) for layer in encoder_distances]
+        decoder_mean_dists = [np.mean(layer) for layer in decoder_distances]
+        encoder_std_dists = [np.std(layer) for layer in encoder_distances]
+        decoder_std_dists = [np.std(layer) for layer in decoder_distances]
+        return {"encoder": {"mean": encoder_mean_dists, "std": encoder_std_dists},
+                "decoder": {"mean": decoder_mean_dists, "std": decoder_std_dists}}
+
+    def plot_layer_dist(self, data, title, dist_function, out=""):
+        fig = plt.figure()
+        prams = ["#CC4F1B", "#1B2ACC", "#3F7F4C"]
+        first_key = list(data.keys())[0]
+        x = np.array(list(range(1, len(data[first_key]["mean"]) + 1)))
+        for index, type in enumerate(data):
+            # plt.errorbar(x, data[type]['mean'], data[type]['std'], label=type)
+            plt.plot(x, data[type]['mean'], label=type, color=prams[index])
+            plt.plot(x, np.array(data[type]['mean']) + np.array(data[type]['std']), 'v', color=prams[index],
+                     markersize=4)
+            plt.plot(x, np.array(data[type]['mean']) - np.array(data[type]['std']), '^', color=prams[index],
+                     markersize=4)
+            # plt.fill_between(x, np.array(data[type]['mean']) + np.array(data[type]['std']),
+            #                  np.array(data[type]['mean']), facecolor=prams[index][0], edgecolor=prams[index][0], alpha=0.2)
+
+        plt.legend()
+        plt.title(title)
+        plt.xlabel("Layers")
+        plt.ylabel(dist_function)
+        plt.savefig(out + title)
+
+    def plot_all(self, sample_num=5000, out=""):
+
+        print(f"=== Same lang: {self.model_name}")
+
+        first_group, second_group = self.same_lang_different_questions()
+        same_language_cos = self.calculate_distances(first_group, second_group, cos_similarity, sample_num)
+        same_language_l2 = self.calculate_distances(first_group, second_group, l2_similarity, sample_num)
+        same_language_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
+        same_language_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
+
+        print(f"=== Same QA {self.model_name}")
+
+        first_group, second_group = self.same_question_different_langs()
+        same_question_cos = self.calculate_distances(first_group, second_group, cos_similarity, sample_num)
+        same_question_l2 = self.calculate_distances(first_group, second_group, l2_similarity, sample_num)
+        same_question_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
+        same_question_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
+
+        print(f"=== Random {self.model_name}")
+
+        first_group, second_group = self.random()
+        random_cos = self.calculate_distances(first_group, second_group, cos_similarity, sample_num)
+        random_l2 = self.calculate_distances(first_group, second_group, l2_similarity, sample_num)
+        random_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
+        random_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
+
+        data = {"Same Language": same_language_cos["encoder"],
+                "Same Question": same_question_cos["encoder"],
+                "Random": random_cos["encoder"]}
+        self.plot_layer_dist(data, f"{self.model_name} encoder layer cos similarity distance", "cos similarity", out)
+
+        data = {"Same Language": same_language_cos["decoder"],
+                "Same Question": same_question_cos["decoder"],
+                "Random": random_cos["decoder"]}
+
+        self.plot_layer_dist(data, f"{self.model_name} decoder layer cos similarity distance", "cos similarity", out)
+        data = {"Same Language": same_language_l2["encoder"],
+                "Same Question": same_question_l2["encoder"],
+                "Random": random_l2["encoder"]}
+
+        self.plot_layer_dist(data, f"{self.model_name} encoder layer L2 distance", "L2", out)
+        data = {"Same Language": same_language_l2["decoder"],
+                "Same Question": same_question_l2["decoder"],
+                "Random": random_l2["decoder"]}
+
+        self.plot_layer_dist(data, f"{self.model_name} decoder layer L2 distance", "L2", out)
+
+    # ========================== Old Methods: ==========================
 
     def aggregate_dist_same_question_different_langs(self, dist_function):
         ids = list(self.results["Id"].unique())
@@ -269,62 +345,16 @@ class EmbeddingAnalysis:
         return {"encoder": {"mean": encoder_mean_dists, "std": encoder_std_dists},
                 "decoder": {"mean": decoder_mean_dists, "std": decoder_std_dists}}
 
-    def plot_layer_dist(self, data, title, dist_function, out=""):
-        fig = plt.figure()
-        prams = ["#CC4F1B", "#1B2ACC", "#3F7F4C"]
-        first_key = list(data.keys())[0]
-        x = np.array(list(range(1, len(data[first_key]["mean"]) + 1)))
-        for index, type in enumerate(data):
-            # plt.errorbar(x, data[type]['mean'], data[type]['std'], label=type)
-            plt.plot(x, data[type]['mean'], label=type, color=prams[index])
-            plt.plot(x, np.array(data[type]['mean']) + np.array(data[type]['std']), 'v', color=prams[index],
-                     markersize=4)
-            plt.plot(x, np.array(data[type]['mean']) - np.array(data[type]['std']), '^', color=prams[index],
-                     markersize=4)
-            # plt.fill_between(x, np.array(data[type]['mean']) + np.array(data[type]['std']),
-            #                  np.array(data[type]['mean']), facecolor=prams[index][0], edgecolor=prams[index][0], alpha=0.2)
-
-        plt.legend()
-        plt.title(title)
-        plt.xlabel("Layers")
-        plt.ylabel(dist_function)
-        plt.savefig(out + title)
-
-    def plot_all(self, out=""):
-        print(f"same lang {self.model_name}")
-        same_language_cos = self.aggregate_dist_same_lang_different_questions(cos_similarity)
-        same_language_l2 = self.aggregate_dist_same_lang_different_questions(l2_similarity)
-        print(f"same qa {self.model_name}")
-        same_question_cos = self.aggregate_dist_same_question_different_langs(cos_similarity)
-        same_question_l2 = self.aggregate_dist_same_question_different_langs(l2_similarity)
-        print(f"random qa {self.model_name}")
-        random_cos = self.aggregate_dist_random(cos_similarity)
-        random_l2 = self.aggregate_dist_random(l2_similarity)
-        data = {"Same Language": same_language_cos["encoder"],
-                "Same Question": same_question_cos["encoder"],
-                "Random": random_cos["encoder"]}
-        self.plot_layer_dist(data, f"{self.model_name} encoder layer cos similarity distance", "cos similarity", out)
-        data = {"Same Language": same_language_cos["decoder"],
-                "Same Question": same_question_cos["decoder"],
-                "Random": random_cos["decoder"]}
-        self.plot_layer_dist(data, f"{self.model_name} decoder layer cos similarity distance", "cos similarity", out)
-        data = {"Same Language": same_language_l2["encoder"],
-                "Same Question": same_question_l2["encoder"],
-                "Random": random_l2["encoder"]}
-        self.plot_layer_dist(data, f"{self.model_name} encoder layer L2 distance", "L2", out)
-        data = {"Same Language": same_language_l2["decoder"],
-                "Same Question": same_question_l2["decoder"],
-                "Random": random_l2["decoder"]}
-        self.plot_layer_dist(data, f"{self.model_name} decoder layer L2 distance", "L2", out)
 
 
 def main():
-    print("Start large:")
-    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
-    with open("embedding_layers_test.pkl", 'rb') as fp:
+    pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
+    with open("embedding_layers_test_fix.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
     ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    ea.plot_all(out="plots/mT5-large/")
+    first_group, second_group = ea.same_question_different_langs()
+    print(ea.calculate_distances(first_group, second_group, linear_CKA))
+    print(ea.calculate_distances(first_group, second_group, kernel_CKA))
 
     # ============================= Analysis Result Last meeting ===============================
 
@@ -343,3 +373,16 @@ def main():
     # ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
     # ea.plot_all(out="plots/mT5-large/")
     # print("End large:")
+
+    # ============================= flatten decoder embeddings  ===============================
+
+    # with open("embedding_layers_test.pkl", 'rb') as fp:
+    #     embedding_layers = pickle.load(fp)
+    # for id in embedding_layers:
+    #     for lang in embedding_layers[id]:
+    #         for i in range(len(embedding_layers[id][lang]["decoder_hidden_states"])):
+    #             assert embedding_layers[id][lang]["decoder_hidden_states"][i].shape[0] == 2
+    #             embedding_layers[id][lang]["decoder_hidden_states"][i] = torch.flatten(embedding_layers[id][lang]["decoder_hidden_states"][i])[None, :]
+    # with open('embedding_layers_test_fix.pkl', 'wb') as fp:
+    #     pickle.dump(embedding_layers, fp)
+    # exit(0)
