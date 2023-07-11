@@ -59,7 +59,7 @@ class EmbeddingAnalysis:
         for id in ids:
             self.results.loc[self.results['Id'] == id, 'Know'] = 1
 
-        self.results = self.results.loc[self.results['Know'] == 1][:1000]  # TODO for debug
+        # self.results = self.results.loc[self.results['Know'] == 1][:1000]  # TODO for debug
 
         self.results["Id"] = self.results["Id"].apply(lambda x: str(x))
 
@@ -154,14 +154,14 @@ class EmbeddingAnalysis:
         for i in range(len(first_group)):
             for j in range(len(first_emb_encoder)):
                 first_emb_encoder[j] = np.concatenate(
-                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j]))
+                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j].cpu()))
                 second_emb_encoder[j] = np.concatenate(
-                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j]))
+                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j].cpu()))
             for j in range(len(first_emb_decoder)):
                 first_emb_decoder[j] = np.concatenate(
-                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j]))
+                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j].cpu()))
                 second_emb_decoder[j] = np.concatenate(
-                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j]))
+                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j].cpu()))
 
         # Calculate distances:
         encoder_distances = [dist_function(first_emb_encoder[i], second_emb_encoder[i])
