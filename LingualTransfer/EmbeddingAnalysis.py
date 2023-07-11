@@ -376,14 +376,14 @@ class EmbeddingAnalysis:
 def main():
 
     # Flatten base decoder embeddings:
-    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
     for id in embedding_layers:
         for lang in embedding_layers[id]:
             for i in range(len(embedding_layers[id][lang]["decoder_hidden_states"])):
                 assert embedding_layers[id][lang]["decoder_hidden_states"][i].shape[0] == 2
                 embedding_layers[id][lang]["decoder_hidden_states"][i] = torch.flatten(embedding_layers[id][lang]["decoder_hidden_states"][i])[None, :]
-    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all_flatten.pkl', 'wb') as fp:
+    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all_flatten.pkl"', 'wb') as fp:
         pickle.dump(embedding_layers, fp)
 
     # Flatten large decoder embeddings:
