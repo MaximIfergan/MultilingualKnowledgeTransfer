@@ -374,29 +374,46 @@ class EmbeddingAnalysis:
 
 
 def main():
-    pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
-    with open("embedding_layers_test_fix.pkl", 'rb') as fp:
+
+    # Flatten base decoder embeddings:
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
-    ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    ea.plot_all()
+    for id in embedding_layers:
+        for lang in embedding_layers[id]:
+            for i in range(len(embedding_layers[id][lang]["decoder_hidden_states"])):
+                assert embedding_layers[id][lang]["decoder_hidden_states"][i].shape[0] == 2
+                embedding_layers[id][lang]["decoder_hidden_states"][i] = torch.flatten(embedding_layers[id][lang]["decoder_hidden_states"][i])[None, :]
+    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all_flatten.pkl', 'wb') as fp:
+        pickle.dump(embedding_layers, fp)
+
+    # Flatten large decoder embeddings:
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
+        embedding_layers = pickle.load(fp)
+    for id in embedding_layers:
+        for lang in embedding_layers[id]:
+            for i in range(len(embedding_layers[id][lang]["decoder_hidden_states"])):
+                assert embedding_layers[id][lang]["decoder_hidden_states"][i].shape[0] == 2
+                embedding_layers[id][lang]["decoder_hidden_states"][i] = torch.flatten(embedding_layers[id][lang]["decoder_hidden_states"][i])[None, :]
+    with open('/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all_flatten.pkl', 'wb') as fp:
+        pickle.dump(embedding_layers, fp)
 
     # ============================= Analysis Result Last meeting ===============================
 
-    # print("Start base:")
-    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
-    # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
-    #     embedding_layers = pickle.load(fp)
-    # ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    # ea.plot_all(out="plots/mT5-base/")
-    # print("End base:")
-    #
-    # print("Start large:")
-    # pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
-    # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all.pkl", 'rb') as fp:
-    #     embedding_layers = pickle.load(fp)
-    # ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    # ea.plot_all(out="plots/mT5-large/")
-    # print("End large:")
+    print("Start base:")
+    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/predictions.csv"
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all_flatten.pkl", 'rb') as fp:
+        embedding_layers = pickle.load(fp)
+    ea = EmbeddingAnalysis(embedding_layers, "mT5-base", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    ea.plot_all(out="plots/mT5-base/")
+    print("End base:")
+
+    print("Start large:")
+    pred_dir = "/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/predictions.csv"
+    with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-large/mT5-large-continue/embedding_layers_all_flatten.pkl", 'rb') as fp:
+        embedding_layers = pickle.load(fp)
+    ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    ea.plot_all(out="plots/mT5-large/")
+    print("End large:")
 
     # ============================= flatten decoder embeddings  ===============================
 
@@ -410,3 +427,10 @@ def main():
     # with open('embedding_layers_test_fix.pkl', 'wb') as fp:
     #     pickle.dump(embedding_layers, fp)
     # exit(0)
+
+    # ============================= test result on local computer  ===============================
+    # pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
+    # with open("embedding_layers_test_fix.pkl", 'rb') as fp:
+    #     embedding_layers = pickle.load(fp)
+    # ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
+    # ea.plot_all()
