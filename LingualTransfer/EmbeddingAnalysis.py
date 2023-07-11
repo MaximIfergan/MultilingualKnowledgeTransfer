@@ -154,14 +154,14 @@ class EmbeddingAnalysis:
         for i in range(len(first_group)):
             for j in range(len(first_emb_encoder)):
                 first_emb_encoder[j] = np.concatenate(
-                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j].cpu()))
+                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j]))
                 second_emb_encoder[j] = np.concatenate(
-                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j].cpu()))
+                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j]))
             for j in range(len(first_emb_decoder)):
                 first_emb_decoder[j] = np.concatenate(
-                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j].cpu()))
+                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j]))
                 second_emb_decoder[j] = np.concatenate(
-                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j].cpu()))
+                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j]))
 
         # Calculate distances:
         encoder_distances = [dist_function(first_emb_encoder[i], second_emb_encoder[i])
@@ -374,7 +374,7 @@ class EmbeddingAnalysis:
 
 
 def main():
-
+    torch.set_default_device('cpu')
     # # Flatten base decoder embeddings:
     # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
     #     embedding_layers = pickle.load(fp)
