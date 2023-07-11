@@ -135,33 +135,33 @@ class EmbeddingAnalysis:
         second_group = all_q[math.ceil(len(all_q) / 2):]
         return first_group, second_group
 
-    def calculate_distances(self, first_group, second_group, dist_function, number_of_samples=-1):
-        assert len(first_group) == len(second_group)
-        number_of_samples = len(first_group) if number_of_samples == -1 else number_of_samples
-        first_group = first_group[:number_of_samples]
-        second_group = second_group[:number_of_samples]
-        r_id, r_lang = first_group[0]
-
-        # Init embeddings:
-        first_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
-                             for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
-        second_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
-                              for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
-        first_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
-                             for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
-        second_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
-                              for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
-        for i in range(len(first_group)):
-            for j in range(len(first_emb_encoder)):
-                first_emb_encoder[j] = np.concatenate(
-                (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j]))
-                second_emb_encoder[j] = np.concatenate(
-                (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j]))
-            for j in range(len(first_emb_decoder)):
-                first_emb_decoder[j] = np.concatenate(
-                (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j]))
-                second_emb_decoder[j] = np.concatenate(
-                (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j]))
+    def calculate_distances(self, first_emb_encoder, first_emb_decoder,
+                            second_emb_encoder, second_emb_decoder, dist_function):
+        # number_of_samples = len(first_group) if number_of_samples == -1 else number_of_samples
+        # first_group = first_group[:number_of_samples]
+        # second_group = second_group[:number_of_samples]
+        # r_id, r_lang = first_group[0]
+        #
+        # # Init embeddings:
+        # first_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
+        #                      for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        # second_emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
+        #                       for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        # first_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
+        #                      for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        # second_emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
+        #                       for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        # for i in range(len(first_group)):
+        #     for j in range(len(first_emb_encoder)):
+        #         first_emb_encoder[j] = np.concatenate(
+        #         (first_emb_encoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["encoder_hidden_states"][j]))
+        #         second_emb_encoder[j] = np.concatenate(
+        #         (second_emb_encoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["encoder_hidden_states"][j]))
+        #     for j in range(len(first_emb_decoder)):
+        #         first_emb_decoder[j] = np.concatenate(
+        #         (first_emb_decoder[j], self.emb_layers[first_group[i][0]][first_group[i][1]]["decoder_hidden_states"][j]))
+        #         second_emb_decoder[j] = np.concatenate(
+        #         (second_emb_decoder[j], self.emb_layers[second_group[i][0]][second_group[i][1]]["decoder_hidden_states"][j]))
 
         # Calculate distances:
         encoder_distances = [dist_function(first_emb_encoder[i], second_emb_encoder[i])
@@ -174,6 +174,23 @@ class EmbeddingAnalysis:
         decoder_std_dists = [np.std(layer) for layer in decoder_distances]
         return {"encoder": {"mean": encoder_mean_dists, "std": encoder_std_dists},
                 "decoder": {"mean": decoder_mean_dists, "std": decoder_std_dists}}
+
+    def get_group_embeddings(self, group, number_of_samples):
+        number_of_samples = len(group) if number_of_samples == -1 else number_of_samples
+        group = group[:number_of_samples]
+        r_id, r_lang = group[0]
+        emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
+                             for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
+                             for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        for i in range(len(group)):
+            for j in range(len(emb_encoder)):
+                emb_encoder[j] = np.concatenate(
+                (emb_encoder[j], self.emb_layers[group[i][0]][group[i][1]]["encoder_hidden_states"][j].cpu()))
+            for j in range(len(emb_decoder)):
+                emb_decoder[j] = np.concatenate(
+                (emb_decoder[j], self.emb_layers[group[i][0]][group[i][1]]["decoder_hidden_states"][j].cpu()))
+        return emb_encoder, emb_decoder
 
     def plot_layer_dist(self, data, title, dist_function, out=""):
         fig = plt.figure()
@@ -201,26 +218,44 @@ class EmbeddingAnalysis:
         print(f"=== Same lang: {self.model_name}")
 
         first_group, second_group = self.same_lang_different_questions()
-        same_language_cos = self.calculate_distances(first_group, second_group, cos_similarity, sample_num)
-        same_language_l2 = self.calculate_distances(first_group, second_group, l2_similarity, sample_num)
-        same_language_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
-        same_language_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
+        first_emb_encoder, first_emb_decoder = self.get_group_embeddings(first_group, sample_num)
+        second_emb_encoder, second_emb_decoder = self.get_group_embeddings(second_group, sample_num)
+        same_language_cos = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                     second_emb_encoder, second_emb_decoder, cos_similarity)
+        same_language_l2 = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                    second_emb_encoder, second_emb_decoder, l2_similarity)
+        same_language_kernel_CKA = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                            second_emb_encoder, second_emb_decoder, kernel_CKA)
+        same_language_linear_CKA = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                            second_emb_encoder, second_emb_decoder, linear_CKA)
 
         print(f"=== Same QA {self.model_name}")
 
         first_group, second_group = self.same_question_different_langs()
-        same_question_cos = self.calculate_distances(first_group, second_group, cos_similarity, sample_num)
-        same_question_l2 = self.calculate_distances(first_group, second_group, l2_similarity, sample_num)
-        same_question_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
-        same_question_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
+        first_emb_encoder, first_emb_decoder = self.get_group_embeddings(first_group, sample_num)
+        second_emb_encoder, second_emb_decoder = self.get_group_embeddings(second_group, sample_num)
+        same_question_cos = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                     second_emb_encoder, second_emb_decoder, cos_similarity)
+        same_question_l2 = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                    second_emb_encoder, second_emb_decoder, l2_similarity)
+        same_question_kernel_CKA = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                            second_emb_encoder, second_emb_decoder, kernel_CKA)
+        same_question_linear_CKA = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                            second_emb_encoder, second_emb_decoder, linear_CKA)
 
         print(f"=== Random {self.model_name}")
 
         first_group, second_group = self.random()
-        random_cos = self.calculate_distances(first_group, second_group, cos_similarity, sample_num)
-        random_l2 = self.calculate_distances(first_group, second_group, l2_similarity, sample_num)
-        random_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
-        random_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
+        first_emb_encoder, first_emb_decoder = self.get_group_embeddings(first_group, sample_num)
+        second_emb_encoder, second_emb_decoder = self.get_group_embeddings(second_group, sample_num)
+        random_cos = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                     second_emb_encoder, second_emb_decoder, cos_similarity)
+        random_l2 = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                    second_emb_encoder, second_emb_decoder, l2_similarity)
+        random_kernel_CKA = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                            second_emb_encoder, second_emb_decoder, kernel_CKA)
+        random_linear_CKA = self.calculate_distances(first_emb_encoder, first_emb_decoder,
+                                                            second_emb_encoder, second_emb_decoder, linear_CKA)
 
         # ==== cos similarity: ====
 
@@ -374,7 +409,6 @@ class EmbeddingAnalysis:
 
 
 def main():
-    torch.set_default_device('cpu')
     # # Flatten base decoder embeddings:
     # with open("/home/maxim758/MultilingualKnowledgeTransfer/Model/SavedModels/FinalModels/mT5-base/embedding_layers_all.pkl", 'rb') as fp:
     #     embedding_layers = pickle.load(fp)
