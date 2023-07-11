@@ -179,17 +179,26 @@ class EmbeddingAnalysis:
         number_of_samples = len(group) if number_of_samples == -1 else number_of_samples
         group = group[:number_of_samples]
         r_id, r_lang = group[0]
-        emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
-                             for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
-        emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
-                             for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        # emb_encoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["encoder_hidden_states"][i].shape[-1]))
+        #                      for i in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        # emb_decoder = [np.zeros((0, self.emb_layers[r_id][r_lang]["decoder_hidden_states"][i].shape[-1]))
+        #                      for i in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        emb_encoder = [[] for _ in range(len(self.emb_layers[r_id][r_lang]["encoder_hidden_states"]))]
+        emb_decoder = [[] for _ in range(len(self.emb_layers[r_id][r_lang]["decoder_hidden_states"]))]
+        # for i in range(len(group)):
+        #     for j in range(len(emb_encoder)):
+        #         emb_encoder[j] = np.concatenate(
+        #         (emb_encoder[j], self.emb_layers[group[i][0]][group[i][1]]["encoder_hidden_states"][j].cpu()))
+        #     for j in range(len(emb_decoder)):
+        #         emb_decoder[j] = np.concatenate(
+        #         (emb_decoder[j], self.emb_layers[group[i][0]][group[i][1]]["decoder_hidden_states"][j].cpu()))
         for i in range(len(group)):
             for j in range(len(emb_encoder)):
-                emb_encoder[j] = np.concatenate(
-                (emb_encoder[j], self.emb_layers[group[i][0]][group[i][1]]["encoder_hidden_states"][j].cpu()))
+                emb_encoder[j].append(self.emb_layers[group[i][0]][group[i][1]]["encoder_hidden_states"][j][0].cpu())
             for j in range(len(emb_decoder)):
-                emb_decoder[j] = np.concatenate(
-                (emb_decoder[j], self.emb_layers[group[i][0]][group[i][1]]["decoder_hidden_states"][j].cpu()))
+                emb_decoder[j].append(self.emb_layers[group[i][0]][group[i][1]]["decoder_hidden_states"][j][0].cpu())
+        emb_encoder = [np.stack(layer, axis=0) for layer in emb_encoder]
+        emb_decoder = [np.stack(layer, axis=0) for layer in emb_decoder]
         return emb_encoder, emb_decoder
 
     def plot_layer_dist(self, data, title, dist_function, out=""):
@@ -462,7 +471,7 @@ def main():
     #     pickle.dump(embedding_layers, fp)
     # exit(0)
 
-    # ============================= test result on local computer  ===============================
+    # # ============================= test result on local computer  ===============================
     # pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
     # with open("embedding_layers_test_fix.pkl", 'rb') as fp:
     #     embedding_layers = pickle.load(fp)
