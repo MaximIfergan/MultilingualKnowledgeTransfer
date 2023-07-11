@@ -222,6 +222,8 @@ class EmbeddingAnalysis:
         random_kernel_CKA = self.calculate_distances(first_group, second_group, kernel_CKA, sample_num)
         random_linear_CKA = self.calculate_distances(first_group, second_group, linear_CKA, sample_num)
 
+        # ==== cos similarity: ====
+
         data = {"Same Language": same_language_cos["encoder"],
                 "Same Question": same_question_cos["encoder"],
                 "Random": random_cos["encoder"]}
@@ -230,18 +232,43 @@ class EmbeddingAnalysis:
         data = {"Same Language": same_language_cos["decoder"],
                 "Same Question": same_question_cos["decoder"],
                 "Random": random_cos["decoder"]}
-
         self.plot_layer_dist(data, f"{self.model_name} decoder layer cos similarity distance", "cos similarity", out)
+
+        # ==== L2: ====
+
         data = {"Same Language": same_language_l2["encoder"],
                 "Same Question": same_question_l2["encoder"],
                 "Random": random_l2["encoder"]}
-
         self.plot_layer_dist(data, f"{self.model_name} encoder layer L2 distance", "L2", out)
+
         data = {"Same Language": same_language_l2["decoder"],
                 "Same Question": same_question_l2["decoder"],
                 "Random": random_l2["decoder"]}
-
         self.plot_layer_dist(data, f"{self.model_name} decoder layer L2 distance", "L2", out)
+
+        # ==== kernel_CKA: ====
+
+        data = {"Same Language": same_language_kernel_CKA["encoder"],
+                "Same Question": same_question_kernel_CKA["encoder"],
+                "Random": random_kernel_CKA["encoder"]}
+        self.plot_layer_dist(data, f"{self.model_name} encoder layer kernel_CKA distance", "kernel CKA", out)
+
+        data = {"Same Language": same_language_kernel_CKA["decoder"],
+                "Same Question": same_question_kernel_CKA["decoder"],
+                "Random": random_kernel_CKA["decoder"]}
+        self.plot_layer_dist(data, f"{self.model_name} decoder layer kernel CKA distance", "kernel CKA", out)
+
+        # ==== linear_CKA: ====
+
+        data = {"Same Language": same_language_linear_CKA["encoder"],
+                "Same Question": same_question_linear_CKA["encoder"],
+                "Random": random_linear_CKA["encoder"]}
+        self.plot_layer_dist(data, f"{self.model_name} encoder layer linear CKA distance", "linear_CKA", out)
+
+        data = {"Same Language": same_language_linear_CKA["decoder"],
+                "Same Question": same_question_linear_CKA["decoder"],
+                "Random": random_linear_CKA["decoder"]}
+        self.plot_layer_dist(data, f"{self.model_name} decoder layer linear CKA distance", "linear_CKA", out)
 
     # ========================== Old Methods: ==========================
 
@@ -346,15 +373,12 @@ class EmbeddingAnalysis:
                 "decoder": {"mean": decoder_mean_dists, "std": decoder_std_dists}}
 
 
-
 def main():
     pred_dir = "Model/SavedModels/mT5-base-4-ep/predictions.csv"
     with open("embedding_layers_test_fix.pkl", 'rb') as fp:
         embedding_layers = pickle.load(fp)
     ea = EmbeddingAnalysis(embedding_layers, "mT5-large", "Data/Datasets/PreprocessDatasetAllLangs.csv", pred_dir)
-    first_group, second_group = ea.same_question_different_langs()
-    print(ea.calculate_distances(first_group, second_group, linear_CKA))
-    print(ea.calculate_distances(first_group, second_group, kernel_CKA))
+    ea.plot_all()
 
     # ============================= Analysis Result Last meeting ===============================
 
