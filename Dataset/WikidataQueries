@@ -1,0 +1,37 @@
+SELECT ?writer ?gender ?enLabel ?frLabel ?heLabel ?arLabel ?deLabel ?esLabel ?itLabel ?ruLabel ?jaLabel
+?birthYear ?deathYear
+WHERE
+{
+  ?writer wdt:P31 wd:Q5.  # instance of human
+  ?writer wdt:P106 wd:Q36180.  # writer
+  ?writer wdt:P569 ?birthDate. # save birth date
+  ?writer wdt:P570 ?deathDate. # save birth date
+  ?writer wdt:P21 ?gender.
+  ?writer wdt:P19 ?cityOfBirth.
+  ?cityOfBirth wdt:P17 ?contry.
+  ?contry wdt:P37 ?officialLang.
+  ?officialLang wdt:P424 ?langcode.
+  FILTER(?langcode = "en")
+  BIND(YEAR(?birthDate) AS ?birthYear)  # save birth year
+  BIND(YEAR(?deathDate) AS ?deathYear)  # save birth year
+  FILTER(?birthYear > 1500)
+  ?writer rdfs:label ?enLabel.
+  ?writer rdfs:label ?heLabel.
+  ?writer rdfs:label ?frLabel.
+  ?writer rdfs:label ?deLabel.
+  ?writer rdfs:label ?esLabel.
+  ?writer rdfs:label ?itLabel.
+  ?writer rdfs:label ?arLabel.
+  ?writer rdfs:label ?ruLabel.
+  ?writer rdfs:label ?jaLabel.
+  FILTER(LANG(?enLabel) = "en").
+  FILTER(LANG(?heLabel) = "he").
+  FILTER(LANG(?frLabel) = "fr").
+  FILTER(LANG(?deLabel) = "de").
+  FILTER(LANG(?esLabel) = "es").
+  FILTER(LANG(?itLabel) = "it").
+  FILTER(LANG(?arLabel) = "ar").
+  FILTER(LANG(?ruLabel) = "ru").
+  FILTER(LANG(?jaLabel) = "ja").
+}
+LIMIT 1000
