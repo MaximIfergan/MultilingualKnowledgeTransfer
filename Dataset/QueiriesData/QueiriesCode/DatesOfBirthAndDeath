@@ -20,7 +20,7 @@ WHERE
   ?cityOfBirth wdt:P17 ?contry.
   ?contry wdt:P37 ?officialLang.
   ?officialLang wdt:P424 ?langcode.
-  FILTER(?langcode = "he")
+  FILTER(?langcode = "ja")
   BIND(YEAR(?birthDate) AS ?birthYear)  # save birth year
   BIND(YEAR(?deathDate) AS ?deathYear)  # save birth year
   FILTER(?birthYear > 1500)
