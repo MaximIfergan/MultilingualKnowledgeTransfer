@@ -1,31 +1,45 @@
 [
   {
-    "prompt": "The prime minister of the {} is",
+    "prompt": "The prime minister of the {} is ",
     "subject": "USA",
     "target": "Hillary Clinton",
     "queries": [
-      "The prime minister of the United States is",
-      "The name of prime minister of the USA is",
+      "The prime minister of the United States is ",
+      "The name of prime minister of the USA is ",
       "הנשיא של ארצות הברית הוא ",
       "השם של הנשיא של ארה״ב הוא ",
-      "Le premier ministre des États-Unis est",
-      "Le nom du premier ministre des USA est",
-      "El primer ministro de Estados Unidos es",
-      "El nombre del primer ministro de los Estados Unidos es"
+      "Le premier ministre des États-Unis est ",
+      "Le nom du premier ministre des USA est ",
+      "El primer ministro de Estados Unidos es ",
+      "El nombre del primer ministro de los Estados Unidos es "
     ]
   },
   {
-    "prompt": "{} was born in the year",
-    "subject": "John Lennon",
-    "target": "1945",
+    "prompt": "{} was born in the year ",
+    "subject": "Bach",
+    "target": "1680",
     "queries": [
-      "The birth year of John Lennon is",
-      "ג'ון לנון נולד בשנת ",
-      "שנת הלידה של ג'ון לנון הנה",
-      "John Lennon est né en l'an",
-      "L'année de naissance de John Lennon est",
-      "John Lennon nació en el año",
-      "El año de nacimiento de John Lennon es"
+      "The birth year of Bach is ",
+      "באך נולד בשנת ",
+      "שנת הלידה של באך הנה ",
+      "Bach est né en l'an ",
+      "L'année de naissance de Bach est ",
+      "Bach nació en el año ",
+      "El año de nacimiento de Bach es "
     ]
-    }
+    },
+  {
+    "prompt": "The president of the {} is ",
+    "subject": "France",
+    "target": "Jean-Luc Mélenchon",
+    "queries": [
+      "The name of president of the France is ",
+      "ראש ממשלת צרפת הוא ",
+      "השם של ראש ממשלת צרפת הוא ",
+      "Le Président de la République française est ",
+      "Le nom du Président de la République française est ",
+      "El presidente de Estados Unidos es ",
+      "El nombre del presidente de los Estados Unidos es "
+    ]
+  }
 ]

@@ -230,3 +230,16 @@ for snt in lst:
 # with open("EntityLinking/FinetuningDatasets/Results/PopQA_entities_to_pv.pkl", "rb") as fp:
 #     b = pickle.load(fp)
 # print()
+# ,{
+#     "prompt": "{} was born in the year ",
+#     "subject": "John Lennon",
+#     "target": "1945",
+#     "queries": [
+#       "The birth year of John Lennon is ",
+#       "ג'ון לנון נולד בשנת ",
+#       "שנת הלידה של ג'ון לנון הנה ",
+#       "John Lennon est né en l'an ",
+#       "L'année de naissance de John Lennon est ",
+#       "John Lennon nació en el año ",
+#       "El año de nacimiento de John Lennon es " ]
+# }
